@@ -19,7 +19,7 @@ function open_raster(input::String,band::Int32)
     raster_type = gdal_get_raster_datatype(raster)
     raster_jtype = raster_type_convert(raster_type)
     data = zeros(raster_jtype,xsize,ysize)
-    gdal_raster_io!(raster, data,raster_type,xsize,ysize)
+    gdal_raster_io!(raster, data,raster_type,xsize,ysize,false,[int32(0) int32(0)])
     Raster(dataset,xsize,ysize,data')
 end
 
@@ -63,8 +63,8 @@ function gdal_get_raster_datatype(raster::Ptr{Void})
     ccall((:GDALGetRasterDataType,"libgdal"), Int32, (Ptr{Void},), raster)
 end
 
-function gdal_raster_io!{T}(raster::Ptr{Void}, data::Array{T,2},raster_type::Int32,xsize::Int32,ysize::Int32)
-    ccall((:GDALRasterIO,"libgdal"), Ptr{Void}, (Ptr{Void}, Bool, Int32, Int32, Int32, Int32, Ptr{Void}, Int32, Int32, Int32, Int32, Int32), raster, false, 0, 0, xsize, ysize, data, xsize, ysize, raster_type, 0, 0)
+function gdal_raster_io!{T}(raster::Ptr{Void}, data::Array{T,2},raster_type::Int32,xsize::Int32,ysize::Int32, read::Bool,offset::Array{Int32,2})
+    ccall((:GDALRasterIO,"libgdal"), Ptr{Void}, (Ptr{Void}, Bool, Int32, Int32, Int32, Int32, Ptr{Void}, Int32, Int32, Int32, Int32, Int32), raster, false, offset[1], offset[2], xsize, ysize, data, xsize, ysize, raster_type, 0, 0)
 end
 
 end
