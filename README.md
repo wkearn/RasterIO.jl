@@ -3,7 +3,7 @@ GDAL.jl
 
 Julia wrapper for the Geospatial Data Analysis library
 
-# Provided Types #
+## Provided Types ##
 
 	type Raster{T}
 		ptr::Ptr{Void}
@@ -16,7 +16,7 @@ Julia wrapper for the Geospatial Data Analysis library
 
 A raster type consisting of a pointer to the raster dataset (not to the raster band, which GDAL also provides), the size of the raster in width and height, and the raster data itself as an Array.
 
-# Provided Functions #
+## Provided Functions ##
 
 	open_raster(input::String,band::Int32,access::Int32)
 
@@ -34,13 +34,13 @@ Writes the specified raster object to the destination file using the given drive
 
 Translates the source raster into the destination raster by opening the source as a Julia Raster then calling `copy_raster` on the Raster. Probably not as fast as just opening the dataset and copying the raster in C or through ccall since it has to read all of the raster data into the . More of a proof that the Raster type does what we want it to do.
 
-# Usage #
+## Usage ##
 
 If you had a raster map, say a digital elevation model, stored as a GeoTiff in "dem.tif," `dem = open_raster("dem.tif",1,GA_ReadOnly)` would return a Raster type object with fields giving you the width and height of the raster, the geotransform as output by GDAL, and the projection in OpenGIS WKT format. If you wanted to display the raster using PyPlot, for instance, `matshow(dem.data)` would display the raster. This doesn't yet support georeferenced plotting.
 
 Writing the loaded raster
 
-# Todo #
+## Todo ##
 
 1. Figure out a better way to handle the GDALDatatype and Julia datatypes interface. Currently, it can't handle complex types, mostly because I haven't thought hard enough about the 
 2. Currently the gdal\_open and gdal\_raster_io functions only take a subset of the arguments passed to the C functions for simplicity.
