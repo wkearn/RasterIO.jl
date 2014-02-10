@@ -38,7 +38,7 @@ Translates the source raster into the destination raster by opening the source a
 
 If you had a raster map, say a digital elevation model, stored as a GeoTiff in "dem.tif," `dem = open_raster("dem.tif",1,GA_ReadOnly)` would return a Raster type object with fields giving you the width and height of the raster, the geotransform as output by GDAL, and the projection in OpenGIS WKT format. If you wanted to display the raster using PyPlot, for instance, `matshow(dem.data)` would display the raster. This doesn't yet support georeferenced plotting.
 
-Writing the loaded raster
+To write the loaded raster to a driver that supports the Create() method, `write\_raster(dem,"dem.cdf","netCDF",GDT\_Float32)`. This writes your DEM to dem.cdf in NetCDF format using a 32-bit floating point type.
 
 ## Todo ##
 
