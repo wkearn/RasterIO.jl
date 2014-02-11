@@ -377,3 +377,12 @@ typealias VRTSourcedRasterBandH Ptr{None}
 typealias VRTWarpedRasterBandH Ptr{None}
 typealias VRTDerivedRasterBandH Ptr{None}
 typealias VRTRawRasterBandH Ptr{None}
+
+# CPLErr Data Type: added by hand
+
+typealias CPLErr Int32
+const CE_None = 0
+const CE_Debug = 1
+const CE_Warning = 2
+const CE_Failure = 3
+const CE_Fatal = 4
