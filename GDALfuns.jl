@@ -1,4 +1,3 @@
-module GDALfuns
 include("gdaldefs.jl")
 # Julia wrapper for header: /opt/local/include/gdal.h
 # Automatically generated using Clang.jl wrap_c, version 0.0.0
@@ -15,7 +14,7 @@ include("gdaldefs.jl")
 @c Ptr{Uint8} GDALGetPaletteInterpretationName (GDALPaletteInterp,) libgdal
 @c None GDALAllRegister () libgdal
 @c GDALDatasetH GDALCreate (GDALDriverH, Ptr{Uint8}, Cint, Cint, Cint, GDALDataType, Ptr{Ptr{Uint8}}) libgdal
-@c GDALDatasetH GDALCreateCopy (GDALDriverH, Ptr{Uint8}, GDALDatasetH, Cint, Ptr{Ptr{Uint8}}, GDALProgressFunc, Ptr{None}) libgdal
+@c GDALDatasetH GDALCreateCopy (GDALDriverH, Ptr{Uint8}, GDALDatasetH, Cint, Ptr{Ptr{Uint8}}, Ptr{None}, Ptr{None}) libgdal
 @c GDALDriverH GDALIdentifyDriver (Ptr{Uint8}, Ptr{Ptr{Uint8}}) libgdal
 @c GDALDatasetH GDALOpen (Ptr{Uint8}, GDALAccess) libgdal
 @c GDALDatasetH GDALOpenShared (Ptr{Uint8}, GDALAccess) libgdal
@@ -191,4 +190,3 @@ include("gdaldefs.jl")
 @c GIntBig GDALGetCacheMax64 () libgdal
 @c GIntBig GDALGetCacheUsed64 () libgdal
 @c Cint GDALFlushCacheBlock () libgdal
-end

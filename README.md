@@ -32,18 +32,17 @@ Writes the specified raster object to the destination file using the given drive
 
 	gdal_translate(source::ASCIIString,destination::ASCIIString,dstdriver::ASCIIString)
 
-Translates the source raster into the destination raster by opening the source as a Julia Raster then calling `copy_raster` on the Raster. Probably not as fast as just opening the dataset and copying the raster in C or through ccall since it has to read all of the raster data into the . More of a proof that the Raster type does what we want it to do.
+Translates the source raster into the destination raster by opening the source as a Julia Raster then calling `copy_raster` on the Raster. Probably not as fast as just opening the dataset and copying the raster in C or through ccall since it has to read all of the raster data into Julia. More of a proof that the Raster type does what we want it to do.
 
 ## Usage ##
 
 If you had a raster map, say a digital elevation model, stored as a GeoTiff in "dem.tif," `dem = open_raster("dem.tif",1,GA_ReadOnly)` would return a Raster type object with fields giving you the width and height of the raster, the geotransform as output by GDAL, and the projection in OpenGIS WKT format. If you wanted to display the raster using PyPlot, for instance, `matshow(dem.data)` would display the raster. This doesn't yet support georeferenced plotting.
 
-To write the loaded raster to a driver that supports the Create() method, `write_raster(dem,"dem.cdf","netCDF",GDT_Float32)`. This writes your DEM to dem.cdf in NetCDF format using a 32-bit floating point type.
+To write the loaded raster to a driver that supports the Create() method, `write_raster(dem,"dem.cdf","netCDF",GDT_Float32)`. This writes your DEM to dem.cdf in NetCDF format using a 32-bit floating point type. `copy_raster(dem,"dem.cdf","netCDF")` will do the same by calling GDALCreateCopy() which is supported on a different set of drivers than Create().
 
 ## Todo ##
 
-1. Figure out a better way to handle the GDALDatatype and Julia datatypes interface. Currently, it can't handle complex types, mostly because I haven't thought hard enough about the 
-2. Currently the gdal\_open and gdal\_raster_io functions only take a subset of the arguments passed to the C functions for simplicity.
-3. Write a parser for the projection strings, so we can do useful things with the projection.
-4. Come up with a good way to display rasters using the georeferenced coordinates.
-5. Add support for missing data. Maybe using DataArrays. How does GDAL handle missing data?
+1. Figure out a better way to handle the GDALDatatype and Julia datatypes interface. Currently, it can't handle complex types, mostly because I haven't thought hard enough about them.
+2. Write a parser for the projection strings, so we can do useful things with the projection.
+3. Come up with a good way to display rasters using the georeferenced coordinates.
+4. Add support for missing data. Maybe using DataArrays. How does GDAL handle missing data?

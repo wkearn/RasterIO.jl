@@ -378,7 +378,7 @@ typealias VRTWarpedRasterBandH Ptr{None}
 typealias VRTDerivedRasterBandH Ptr{None}
 typealias VRTRawRasterBandH Ptr{None}
 
-# CPLErr Data Type: added by hand
+# CPLErr Data Type: added by hand from cplerror.h
 
 typealias CPLErr Int32
 const CE_None = 0
