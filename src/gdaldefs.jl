@@ -26,22 +26,6 @@ const GMF_PER_DATASET = 0x02
 const GMF_ALPHA = 0x04
 const GMF_NODATA = 0x08
 # Skipping MacroDefinition: GDAL_CHECK_VERSION(pszCallingComponentName)GDALCheckVersion(GDAL_VERSION_MAJOR,GDAL_VERSION_MINOR,pszCallingComponentName)
-# begin enum ANONYMOUS_21
-typealias ANONYMOUS_21 Uint32
-const GDT_Unknown = 0
-const GDT_Byte = 1
-const GDT_UInt16 = 2
-const GDT_Int16 = 3
-const GDT_UInt32 = 4
-const GDT_Int32 = 5
-const GDT_Float32 = 6
-const GDT_Float64 = 7
-const GDT_CInt16 = 8
-const GDT_CInt32 = 9
-const GDT_CFloat32 = 10
-const GDT_CFloat64 = 11
-const GDT_TypeCount = 12
-# end enum ANONYMOUS_21
 # begin enum GDALDataType
 typealias GDALDataType Uint32
 const GDT_Unknown = 0
@@ -58,14 +42,6 @@ const GDT_CFloat32 = 10
 const GDT_CFloat64 = 11
 const GDT_TypeCount = 12
 # end enum GDALDataType
-# begin enum ANONYMOUS_22
-typealias ANONYMOUS_22 Uint32
-const GARIO_PENDING = 0
-const GARIO_UPDATE = 1
-const GARIO_ERROR = 2
-const GARIO_COMPLETE = 3
-const GARIO_TypeCount = 4
-# end enum ANONYMOUS_22
 # begin enum GDALAsyncStatusType
 typealias GDALAsyncStatusType Uint32
 const GARIO_PENDING = 0
@@ -74,47 +50,16 @@ const GARIO_ERROR = 2
 const GARIO_COMPLETE = 3
 const GARIO_TypeCount = 4
 # end enum GDALAsyncStatusType
-# begin enum ANONYMOUS_23
-typealias ANONYMOUS_23 Uint32
-const GA_ReadOnly = 0
-const GA_Update = 1
-# end enum ANONYMOUS_23
 # begin enum GDALAccess
 typealias GDALAccess Uint32
 const GA_ReadOnly = 0
 const GA_Update = 1
 # end enum GDALAccess
-# begin enum ANONYMOUS_24
-typealias ANONYMOUS_24 Uint32
-const GF_Read = 0
-const GF_Write = 1
-# end enum ANONYMOUS_24
 # begin enum GDALRWFlag
 typealias GDALRWFlag Uint32
 const GF_Read = 0
 const GF_Write = 1
 # end enum GDALRWFlag
-# begin enum ANONYMOUS_25
-typealias ANONYMOUS_25 Uint32
-const GCI_Undefined = 0
-const GCI_GrayIndex = 1
-const GCI_PaletteIndex = 2
-const GCI_RedBand = 3
-const GCI_GreenBand = 4
-const GCI_BlueBand = 5
-const GCI_AlphaBand = 6
-const GCI_HueBand = 7
-const GCI_SaturationBand = 8
-const GCI_LightnessBand = 9
-const GCI_CyanBand = 10
-const GCI_MagentaBand = 11
-const GCI_YellowBand = 12
-const GCI_BlackBand = 13
-const GCI_YCbCr_YBand = 14
-const GCI_YCbCr_CbBand = 15
-const GCI_YCbCr_CrBand = 16
-const GCI_Max = 16
-# end enum ANONYMOUS_25
 # begin enum GDALColorInterp
 typealias GDALColorInterp Uint32
 const GCI_Undefined = 0
@@ -136,13 +81,6 @@ const GCI_YCbCr_CbBand = 15
 const GCI_YCbCr_CrBand = 16
 const GCI_Max = 16
 # end enum GDALColorInterp
-# begin enum ANONYMOUS_26
-typealias ANONYMOUS_26 Uint32
-const GPI_Gray = 0
-const GPI_RGB = 1
-const GPI_CMYK = 2
-const GPI_HLS = 3
-# end enum ANONYMOUS_26
 # begin enum GDALPaletteInterp
 typealias GDALPaletteInterp Uint32
 const GPI_Gray = 0
@@ -159,40 +97,12 @@ typealias GDALColorTableH Ptr{None}
 typealias GDALRasterAttributeTableH Ptr{None}
 typealias GDALAsyncReaderH Ptr{None}
 typealias GDALDerivedPixelFunc Ptr{Void}
-# begin enum ANONYMOUS_27
-typealias ANONYMOUS_27 Uint32
-const GFT_Integer = 0
-const GFT_Real = 1
-const GFT_String = 2
-# end enum ANONYMOUS_27
 # begin enum GDALRATFieldType
 typealias GDALRATFieldType Uint32
 const GFT_Integer = 0
 const GFT_Real = 1
 const GFT_String = 2
 # end enum GDALRATFieldType
-# begin enum ANONYMOUS_28
-typealias ANONYMOUS_28 Uint32
-const GFU_Generic = 0
-const GFU_PixelCount = 1
-const GFU_Name = 2
-const GFU_Min = 3
-const GFU_Max = 4
-const GFU_MinMax = 5
-const GFU_Red = 6
-const GFU_Green = 7
-const GFU_Blue = 8
-const GFU_Alpha = 9
-const GFU_RedMin = 10
-const GFU_GreenMin = 11
-const GFU_BlueMin = 12
-const GFU_AlphaMin = 13
-const GFU_RedMax = 14
-const GFU_GreenMax = 15
-const GFU_BlueMax = 16
-const GFU_AlphaMax = 17
-const GFU_MaxCount = 18
-# end enum ANONYMOUS_28
 # begin enum GDALRATFieldUsage
 typealias GDALRATFieldUsage Uint32
 const GFU_Generic = 0
@@ -228,23 +138,6 @@ const EXIFOFFSETTAG = 0x8769
 const INTEROPERABILITYOFFSET = 0xA005
 const GPSOFFSETTAG = 0x8825
 const MAXSTRINGLENGTH = 65535
-# begin enum ANONYMOUS_29
-typealias ANONYMOUS_29 Uint32
-const TIFF_NOTYPE = 0
-const TIFF_BYTE = 1
-const TIFF_ASCII = 2
-const TIFF_SHORT = 3
-const TIFF_LONG = 4
-const TIFF_RATIONAL = 5
-const TIFF_SBYTE = 6
-const TIFF_UNDEFINED = 7
-const TIFF_SSHORT = 8
-const TIFF_SLONG = 9
-const TIFF_SRATIONAL = 10
-const TIFF_FLOAT = 11
-const TIFF_DOUBLE = 12
-const TIFF_IFD = 13
-# end enum ANONYMOUS_29
 # begin enum TIFFDataType
 typealias TIFFDataType Uint32
 const TIFF_NOTYPE = 0
@@ -262,16 +155,6 @@ const TIFF_FLOAT = 11
 const TIFF_DOUBLE = 12
 const TIFF_IFD = 13
 # end enum TIFFDataType
-# begin enum ANONYMOUS_30
-typealias ANONYMOUS_30 Uint32
-const GRA_NearestNeighbour = 0
-const GRA_Bilinear = 1
-const GRA_Cubic = 2
-const GRA_CubicSpline = 3
-const GRA_Lanczos = 4
-const GRA_Average = 5
-const GRA_Mode = 6
-# end enum ANONYMOUS_30
 # begin enum GDALResampleAlg
 typealias GDALResampleAlg Uint32
 const GRA_NearestNeighbour = 0
@@ -287,18 +170,6 @@ typealias GDALWarpOperationH Ptr{None}
 typealias GDALTransformerFunc Ptr{Void}
 typealias GDALContourWriter Ptr{Void}
 typealias GDALContourGeneratorH Ptr{None}
-# begin enum ANONYMOUS_31
-typealias ANONYMOUS_31 Uint32
-const GGA_InverseDistanceToAPower = 1
-const GGA_MovingAverage = 2
-const GGA_NearestNeighbor = 3
-const GGA_MetricMinimum = 4
-const GGA_MetricMaximum = 5
-const GGA_MetricRange = 6
-const GGA_MetricCount = 7
-const GGA_MetricAverageDistance = 8
-const GGA_MetricAverageDistancePts = 9
-# end enum ANONYMOUS_31
 # begin enum GDALGridAlgorithm
 typealias GDALGridAlgorithm Uint32
 const GGA_InverseDistanceToAPower = 1
@@ -321,12 +192,6 @@ const GDAL_RELEASE_DATE = 20130826
 const GDAL_RELEASE_NAME = "1.10.1"
 typealias GDALGridFunction Ptr{Void}
 const MAX_ULPS = 10
-# begin enum ANONYMOUS_32
-typealias ANONYMOUS_32 Uint32
-const GBV_UserBurnValue = 0
-const GBV_Z = 1
-const GBV_M = 2
-# end enum ANONYMOUS_32
 # begin enum GDALBurnValueSrc
 typealias GDALBurnValueSrc Uint32
 const GBV_UserBurnValue = 0
