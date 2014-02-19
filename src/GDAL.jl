@@ -17,13 +17,13 @@ export
     GA_ReadOnly,GA_Update
     GF_Read,GF_Write
 
-type Raster{T}
+type Raster{T,N}
     ptr::Ptr{Void}
     width::Int32
     height::Int32
     transform::Array{Float64,1}
     projection::ASCIIString
-    data::Array{T,2}
+    data::Array{T,N}
 end
 
 
@@ -54,6 +54,7 @@ end
 
 ### High Level API functions
 
+# Single band import
 function open_raster(input::ASCIIString,band::Int, access::Int)
     dataset = GDALOpen(input,int32(access))
     raster = GDALGetRasterBand(dataset,int32(band))
@@ -67,6 +68,31 @@ function open_raster(input::ASCIIString,band::Int, access::Int)
     GDALGetGeoTransform(dataset,transform)
     projection = bytestring(GDALGetProjectionRef(dataset))
     map = Raster(dataset,xsize,ysize,transform,projection,data')
+    return map
+end
+
+# Multiple band import (beta)
+function open_raster(input::ASCIIString, access::Int)
+    dataset = GDALOpen(input,int32(access))
+    bandcount = GDALGetRasterCount(dataset)
+    raster = zeros(Ptr{None},bandcount)
+    for i in 1:bandcount
+        raster[i] = GDALGetRasterBand(dataset,int32(i))
+    end
+    xsize = GDALGetRasterXSize(dataset)
+    ysize = GDALGetRasterYSize(dataset)
+    raster_type = GDALGetRasterDataType(raster[1]) #Assumes each band is the same type
+    raster_jtype = raster_type_convert(raster_type)
+    data = zeros(raster_jtype,ysize,xsize,bandcount)
+    for i in 1:bandcount
+        temp = zeros(raster_jtype,xsize,ysize)
+        GDALRasterIO(raster[i], 0, int32(0), int32(0),xsize,ysize,temp,xsize,ysize,raster_type,int32(0),int32(0))
+        data[:,:,i] = temp'
+    end
+    transform = zeros(Float64,6)
+    GDALGetGeoTransform(dataset,transform)
+    projection = bytestring(GDALGetProjectionRef(dataset))
+    map = Raster(dataset,xsize,ysize,transform,projection,data)
     return map
 end
 
