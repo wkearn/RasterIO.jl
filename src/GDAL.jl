@@ -66,7 +66,7 @@ function open_raster(input::ASCIIString,band::Int, access::Int)
     raster_jtype = raster_type_convert(raster_type)
     data = zeros(raster_jtype,xsize,ysize)
     io_error = GDALRasterIO(raster, 0, int32(0), int32(0),xsize,ysize,data,xsize,ysize,raster_type,int32(0),int32(0))
-    if io_error = CE_Failure
+    if io_error == CE_Failure
         error("Failed to read raster band")
     end
     transform = zeros(Float64,6)
@@ -89,16 +89,16 @@ function write_raster(raster::Raster,destination::ASCIIString,drivername::ASCIIS
         error("Failed to write dataset")
     end
     transform_error = GDALSetGeoTransform(dstdataset,raster.transform)
-    if transform_error = CE_Failure
+    if transform_error == CE_Failure
         error("Failed to set transform")
     end
     proj_error = GDALSetProjection(dstdataset,raster.projection)
-    if proj_error = CE_Failue
+    if proj_error == CE_Failue
         error("Failed to set projection")
     end
     dstband = GDALGetRasterBand(dstdataset,int32(1))
     io_error = GDALRasterIO(dstband,1,int32(0),int32(0),raster.width,raster.height,raster.data',raster.width,raster.height,GDALdatatype,int32(0),int32(0))
-    if io_error = CE_Failure
+    if io_error == CE_Failure
         error("Failed to read raster band")
     end
     GDALClose(dstdataset)
