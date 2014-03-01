@@ -93,7 +93,7 @@ function write_raster(raster::Raster,destination::ASCIIString,drivername::ASCIIS
         error("Failed to set transform")
     end
     proj_error = GDALSetProjection(dstdataset,raster.projection)
-    if proj_error == CE_Failue
+    if proj_error == CE_Failure
         error("Failed to set projection")
     end
     dstband = GDALGetRasterBand(dstdataset,int32(1))
