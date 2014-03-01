@@ -10,7 +10,9 @@ export
     Raster,
     # High-level API functions
     open_raster, copy_raster, write_raster,
-    # Utilities
+    # Utility functions
+    driver_list, driver_test,
+    # Other useful functions
     gdal_translate,
     # Constants
     GDT_Unknown, GDT_Byte, GDT_UInt16, GDT_Int16,GDT_UInt32,GDT_Float32,GDT_Float64,
@@ -29,7 +31,7 @@ end
 
 ## Naively convert from GDAL types to Julia types
 
-function raster_type_convert(raster_type)
+function raster_type_convert(raster_type::DataType)
     if raster_type == 0
         raster_jtype = Any
     elseif raster_type == 1
@@ -77,12 +79,18 @@ function open_raster(input::ASCIIString,band::Int=1, access::Int=GA_ReadOnly)
 end
 
 function copy_raster(raster::Raster,destination::ASCIIString,drivername::ASCIIString)
+    if !driver_test(drivername)
+        error("Requested driver not present")
+    end
     driver = GDALGetDriverByName(drivername)
     dstdataset = GDALCreateCopy(driver,destination,raster.ptr,false,C_NULL,C_NULL,C_NULL)
     GDALClose(dstdataset)
 end
 
 function write_raster(raster::Raster,destination::ASCIIString,drivername::ASCIIString, GDALdatatype::Int)
+    if !driver_test(drivername)
+        error("Requested driver not present")
+    end
     driver = GDALGetDriverByName(drivername)
     dstdataset = GDALCreate(driver,destination,raster.width,raster.height,int32(1),int32(GDALdatatype),ASCIIString[])
     if dstdataset == C_NULL
@@ -103,6 +111,26 @@ function write_raster(raster::Raster,destination::ASCIIString,drivername::ASCIIS
     end
     GDALClose(dstdataset)
 end
+
+## Utility functions
+
+function driver_list()
+    driverlist = String[]
+    for i = 0:GDALGetDriverCount()-1
+        driver = GDALGetDriver(i)
+        if driver != C_NULL
+            push!(driverlist,bytestring(GDALGetDriverShortName(driver)))
+        end
+    end
+    return driverlist
+end
+
+function driver_test(drivername::ASCIIString)
+    driverlist = driver_list()
+    in(drivername,driverlist)
+end
+
+## Useful little functions
 
 function gdal_translate(source::ASCIIString,destination::ASCIIString,dstdriver::ASCIIString)
     raster = open_raster(source,1,GA_ReadOnly)
