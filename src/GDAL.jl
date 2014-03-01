@@ -11,7 +11,7 @@ export
     # High-level API functions
     open_raster, copy_raster, write_raster,
     # Utility functions
-    driver_list, driver_test,
+    driver_list, driver_test, check_create,
     # Other useful functions
     gdal_translate,
     # Constants
@@ -82,6 +82,7 @@ function copy_raster(raster::Raster,destination::ASCIIString,drivername::ASCIISt
     if !driver_test(drivername)
         error("Requested driver not present")
     end
+    check_create(drivername,1)
     driver = GDALGetDriverByName(drivername)
     dstdataset = GDALCreateCopy(driver,destination,raster.ptr,false,C_NULL,C_NULL,C_NULL)
     GDALClose(dstdataset)
@@ -91,6 +92,7 @@ function write_raster(raster::Raster,destination::ASCIIString,drivername::ASCIIS
     if !driver_test(drivername)
         error("Requested driver not present")
     end
+    check_create(drivername,0)
     driver = GDALGetDriverByName(drivername)
     dstdataset = GDALCreate(driver,destination,raster.width,raster.height,int32(1),int32(GDALdatatype),ASCIIString[])
     if dstdataset == C_NULL
@@ -128,6 +130,21 @@ end
 function driver_test(drivername::ASCIIString)
     driverlist = driver_list()
     in(drivername,driverlist)
+end
+
+function check_create(drivername::ASCIIString,copy::Int=0)
+    driver = GDALGetDriverByName(drivername)
+    if copy == 1
+        createcopy = GDALGetMetadataItem(driver,"DCAP_CREATECOPY",C_NULL)
+        if createcopy == C_NULL
+            error("CreateCopy method does not exist for the driver")
+        end
+    else
+        create = GDALGetMetadataItem(driver,"DCAP_CREATE",C_NULL)
+        if create == C_NULL
+            error("Create method does not exist for the driver")
+        end
+    end
 end
 
 ## Useful little functions
