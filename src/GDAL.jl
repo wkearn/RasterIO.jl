@@ -31,7 +31,7 @@ end
 
 ## Naively convert from GDAL types to Julia types
 
-function raster_type_convert(raster_type::DataType)
+function raster_type_convert(raster_type)
     if raster_type == 0
         raster_jtype = Any
     elseif raster_type == 1
