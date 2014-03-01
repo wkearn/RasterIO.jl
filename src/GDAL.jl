@@ -11,7 +11,7 @@ export
     # High-level API functions
     open_raster, copy_raster, write_raster,
     # Utilities
-    gdal_translate,
+    gdal_translate, check_create,
     # Constants
     GDT_Unknown, GDT_Byte, GDT_UInt16, GDT_Int16,GDT_UInt32,GDT_Float32,GDT_Float64,
     GA_ReadOnly,GA_Update
@@ -77,12 +77,14 @@ function open_raster(input::ASCIIString,band::Int=1, access::Int=GA_ReadOnly)
 end
 
 function copy_raster(raster::Raster,destination::ASCIIString,drivername::ASCIIString)
+    check_create(drivername,1)
     driver = GDALGetDriverByName(drivername)
     dstdataset = GDALCreateCopy(driver,destination,raster.ptr,false,C_NULL,C_NULL,C_NULL)
     GDALClose(dstdataset)
 end
 
 function write_raster(raster::Raster,destination::ASCIIString,drivername::ASCIIString, GDALdatatype::Int)
+    check_create(drivername,0)
     driver = GDALGetDriverByName(drivername)
     dstdataset = GDALCreate(driver,destination,raster.width,raster.height,int32(1),int32(GDALdatatype),ASCIIString[])
     if dstdataset == C_NULL
@@ -102,6 +104,21 @@ function write_raster(raster::Raster,destination::ASCIIString,drivername::ASCIIS
         error("Failed to read raster band")
     end
     GDALClose(dstdataset)
+end
+
+function check_create(drivername::ASCIIString,copy::Int=0)
+    driver = GDALGetDriverByName(drivername)
+    if copy == 1
+        createcopy = GDALGetMetadataItem(driver,"DCAP_CREATECOPY",C_NULL)
+        if createcopy == C_NULL
+            error("CreateCopy method does not exist for the driver")
+        end
+    else
+        create = GDALGetMetadataItem(driver,"DCAP_CREATE",C_NULL)
+        if create == C_NULL
+            error("Create method does not exist for the driver")
+        end
+    end
 end
 
 function gdal_translate(source::ASCIIString,destination::ASCIIString,dstdriver::ASCIIString)
