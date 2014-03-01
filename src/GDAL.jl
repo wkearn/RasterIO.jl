@@ -54,7 +54,7 @@ end
 
 ### High Level API functions
 
-function open_raster(input::ASCIIString,band::Int, access::Int)
+function open_raster(input::ASCIIString,band::Int=1, access::Int=GA_ReadOnly)
     dataset = GDALOpen(input,int32(access))
     if dataset == C_NULL
         error("Could not open input")
