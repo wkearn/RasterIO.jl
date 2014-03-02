@@ -3,6 +3,10 @@ GDAL.jl
 
 Julia wrapper for the Geospatial Data Analysis library
 
+## Installation ##
+
+	Pkg.clone("git://github.com/wkearn/GDAL.jl.git")
+
 ## Provided Types ##
 
 	type Raster{T}
@@ -33,6 +37,18 @@ Writes the specified raster object to the destination file using the given drive
 	gdal_translate(source::ASCIIString,destination::ASCIIString,dstdriver::ASCIIString)
 
 Translates the source raster into the destination raster by opening the source as a Julia Raster then calling `copy_raster` on the Raster. Probably not as fast as just opening the dataset and copying the raster in C or through ccall since it has to read all of the raster data into Julia. More of a proof that the Raster type does what we want it to do.
+
+	driver_list()
+
+Returns an `Array{String,1}` listing each driver available on your system.
+
+	driver_test(drivername::ASCIIString)
+
+Tests whether the given driver is present on your system.
+
+	check_create(drivername::ASCIIString, copy::Int=0)
+
+Checks whether the given driver supports the Create() or CreateCopy() methods in GDAL. `copy` is an integer argument, 0 (the default) for the Create() method or 1 for CreateCopy(). Used to check for the presence of the given method before calling `write_raster` or `copy_raster`. Returns `false` if either method is not present and `true` otherwise.
 
 ## Usage ##
 
