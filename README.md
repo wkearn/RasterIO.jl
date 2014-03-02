@@ -18,7 +18,7 @@ Julia wrapper for the Geospatial Data Analysis library
 		data::Array{T,2}
 	end
 
-A raster type consisting of a pointer to the raster dataset (not to the individual raster band, which GDAL can also provides), the size of the raster in width and height, the geotransform as an array, the projection information as a WKT string and the raster data itself as an Array.
+A raster type consisting of a pointer to the raster dataset (not to the individual raster band, which GDAL can also provide), the size of the raster in width and height, the geotransform as an array, the projection information as a WKT string and the raster data itself as an Array.
 
 ## Provided Functions ##
 
