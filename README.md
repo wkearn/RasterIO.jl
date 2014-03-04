@@ -22,9 +22,9 @@ A raster type consisting of a pointer to the raster dataset (not to the individu
 
 ## Provided Functions ##
 
-	open_raster(input::String,band::Int32,access::Int32)
+	open_raster(input::String,band::Int32=1,access::Int32=GA_ReadOnly)
 
-Opens the specified band in the specified raster file using GDAL. returns a Raster. Access is 0 for ReadOnly and 1 for Update, or use GA\_ReadOnly and GA\_Update
+Opens the specified band in the specified raster file using GDAL. returns a Raster. Access is 0 for ReadOnly and 1 for Update, or use GA\_ReadOnly and GA\_Update. Defaults passed when you called `open_raster(input)` are band 1 and GA_ReadOnly
 
 	copy_raster(raster::Raster,destination::ASCIIString,driver::ASCIIString)
 
@@ -52,9 +52,13 @@ Checks whether the given driver supports the Create() or CreateCopy() methods in
 
 ## Usage ##
 
-If you had a raster map, say a digital elevation model, stored as a GeoTiff in "dem.tif," `dem = open_raster("dem.tif",1,GA_ReadOnly)` would return a Raster type object with fields giving you the width and height of the raster, the geotransform as output by GDAL, and the projection in OpenGIS WKT format. If you wanted to display the raster using PyPlot, for instance, `matshow(dem.data)` would display the raster. This doesn't yet support georeferenced plotting.
+If you had a raster map, say a digital elevation model, stored as a GeoTiff in "dem.tif," `dem = open_raster("dem.tif",1,GA_ReadOnly)` would return a Raster type object with fields giving you the width and height of the raster, the geotransform as output by GDAL, and the projection in OpenGIS WKT format. If you wanted to display the raster using ImageView, for instance, use the [GIS.jl](https://github.com/wkearn/GIS.jl) package:
 
-To write the loaded raster to a driver that supports the Create() method, `write_raster(dem,"dem.cdf","netCDF",GDT_Float32)`. This writes your DEM to dem.cdf in NetCDF format using a 32-bit floating point type. `copy_raster(dem,"dem.cdf","netCDF")` will do the same by calling GDALCreateCopy() which is supported on a different set of drivers than Create().
+	using GIS
+	dem = open_raster("dem.tif")
+	display(dem)
+
+To write the loaded raster to a driver that supports the Create() method, `write_raster(dem,"dem.cdf","netCDF",GDT_Float32)`. This writes your DEM to dem.cdf in NetCDF format using a 32-bit floating point type. `copy_raster(dem,"dem.cdf","netCDF")` will do the same by calling GDALCreateCopy() which is supported on a different set of drivers than Create(). Use `check_create` to determine which drivers support which methods.
 
 ## Todo ##
 
