@@ -78,6 +78,32 @@ function open_raster(input::ASCIIString,band::Int=1, access::Int=GA_ReadOnly)
     return map
 end
 
+# Multiple band import
+function open_raster(input::ASCIIString, access::Int)
+    dataset = GDALOpen(input,int32(access))
+    bandcount = GDALGetRasterCount(dataset)
+    raster = zeros(Ptr{None},bandcount)
+    for i in 1:bandcount
+        raster[i] = GDALGetRasterBand(dataset,int32(i))
+    end
+    xsize = GDALGetRasterXSize(dataset)
+    ysize = GDALGetRasterYSize(dataset)
+    raster_type = GDALGetRasterDataType(raster[1]) #Assumes each band is the same type
+    raster_jtype = raster_type_convert(raster_type)
+    data = zeros(raster_jtype,ysize,xsize,bandcount)
+    for i in 1:bandcount
+        temp = zeros(raster_jtype,xsize,ysize)
+        GDALRasterIO(raster[i], 0, int32(0), int32(0),xsize,ysize,temp,xsize,ysize,raster_type,int32(0),int32(0))
+        data[:,:,i] = temp'
+    end
+    transform = zeros(Float64,6)
+    GDALGetGeoTransform(dataset,transform)
+    projection = bytestring(GDALGetProjectionRef(dataset))
+    map = Raster(dataset,xsize,ysize,transform,projection,data)
+    return map
+end
+
+
 function copy_raster(raster::Raster,destination::ASCIIString,drivername::ASCIIString)
     if !driver_test(drivername)
         error("Requested driver not present")
