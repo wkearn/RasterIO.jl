@@ -9,22 +9,22 @@ Julia wrapper for the Geospatial Data Analysis library
 
 ## Provided Types ##
 
-	type Raster{T}
+	type Raster{T,N}
 		ptr::Ptr{Void}
 		width::Int32
 		height::Int32
 		transform::Array{Float64,1}
 		projection::ASCIIString
-		data::Array{T,2}
+		data::Array{T,N}
 	end
 
 A raster type consisting of a pointer to the raster dataset (not to the individual raster band, which GDAL can also provide), the size of the raster in width and height, the geotransform as an array, the projection information as a WKT string and the raster data itself as an Array.
 
 ## Provided Functions ##
 
-	open_raster(input::String,band::Int32=1,access::Int32=GA_ReadOnly)
+	open_raster(input::String,access::Int32=GA_ReadOnly)
 
-Opens the specified band in the specified raster file using GDAL. returns a Raster. Access is 0 for ReadOnly and 1 for Update, or use GA\_ReadOnly and GA\_Update. Defaults passed when you called `open_raster(input)` are band 1 and GA_ReadOnly
+Opens the specified raster file using GDAL and returns a Raster. Access is 0 for ReadOnly and 1 for Update, or use GA\_ReadOnly and GA\_Update. Default passed when you called `open_raster(input)` is GA_ReadOnly. This has recently been changed to always import every band from a raster, making it more generally applicable. A forthcoming method will allow you to selectively import bands.
 
 	copy_raster(raster::Raster,destination::ASCIIString,driver::ASCIIString)
 
@@ -64,5 +64,5 @@ To write the loaded raster to a driver that supports the Create() method, `write
 
 1. Figure out a better way to handle the GDALDatatype and Julia datatypes interface. Currently, it can't handle complex types, mostly because I haven't thought hard enough about them.
 2. Write a parser for the projection strings, so we can do useful things with the projection.
-3. Come up with a good way to display rasters using the georeferenced coordinates.
+3. Come up with a good way to display rasters using the georeferenced coordinates (see [GIS.jl](https://github.com/wkearn/GIS.jl))
 4. Add support for missing data. Maybe using DataArrays. How does GDAL handle missing data?

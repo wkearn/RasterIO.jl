@@ -19,13 +19,13 @@ export
     GA_ReadOnly,GA_Update
     GF_Read,GF_Write
 
-type Raster{T}
+type Raster{T,N}
     ptr::Ptr{Void}
     width::Int32
     height::Int32
     transform::Array{Float64,1}
     projection::ASCIIString
-    data::Array{T,2}
+    data::Array{T,N}
 end
 
 
@@ -56,31 +56,38 @@ end
 
 ### High Level API functions
 
-function open_raster(input::ASCIIString,band::Int=1, access::Int=GA_ReadOnly)
+## The following is the old single-band open_raster function.
+# I'm thinking I'll deprecate it in favor of a generalized multiband import
+# Multiband works with single-band as well, so this shouldn't be much of an issue
+
+#function open_raster(input::ASCIIString,band::Int=1, access::Int=GA_ReadOnly)
+#    dataset = GDALOpen(input,int32(access))
+#    if dataset == C_NULL
+#        error("Could not open input")
+#    end
+#    raster = GDALGetRasterBand(dataset,int32(band))
+#    xsize = GDALGetRasterXSize(dataset)
+#    ysize = GDALGetRasterYSize(dataset)
+#    raster_type = GDALGetRasterDataType(raster)
+#    raster_jtype = raster_type_convert(raster_type)
+#    data = zeros(raster_jtype,xsize,ysize)
+#    io_error = GDALRasterIO(raster, 0, int32(0), int32(0),xsize,ysize,data,xsize,ysize,raster_type,int32(0),int32(0))
+#    if io_error == CE_Failure
+#        error("Failed to read raster band")
+#    end
+#    transform = zeros(Float64,6)
+#    GDALGetGeoTransform(dataset,transform)
+#    projection = bytestring(GDALGetProjectionRef(dataset))
+#    map = Raster(dataset,xsize,ysize,transform,projection,data')
+#    return map
+#end
+
+# Multiple band import
+function open_raster(input::ASCIIString, access::Int=GA_ReadOnly)
     dataset = GDALOpen(input,int32(access))
     if dataset == C_NULL
         error("Could not open input")
     end
-    raster = GDALGetRasterBand(dataset,int32(band))
-    xsize = GDALGetRasterXSize(dataset)
-    ysize = GDALGetRasterYSize(dataset)
-    raster_type = GDALGetRasterDataType(raster)
-    raster_jtype = raster_type_convert(raster_type)
-    data = zeros(raster_jtype,xsize,ysize)
-    io_error = GDALRasterIO(raster, 0, int32(0), int32(0),xsize,ysize,data,xsize,ysize,raster_type,int32(0),int32(0))
-    if io_error == CE_Failure
-        error("Failed to read raster band")
-    end
-    transform = zeros(Float64,6)
-    GDALGetGeoTransform(dataset,transform)
-    projection = bytestring(GDALGetProjectionRef(dataset))
-    map = Raster(dataset,xsize,ysize,transform,projection,data')
-    return map
-end
-
-# Multiple band import
-function open_raster(input::ASCIIString, access::Int)
-    dataset = GDALOpen(input,int32(access))
     bandcount = GDALGetRasterCount(dataset)
     raster = zeros(Ptr{None},bandcount)
     for i in 1:bandcount
@@ -93,7 +100,10 @@ function open_raster(input::ASCIIString, access::Int)
     data = zeros(raster_jtype,ysize,xsize,bandcount)
     for i in 1:bandcount
         temp = zeros(raster_jtype,xsize,ysize)
-        GDALRasterIO(raster[i], 0, int32(0), int32(0),xsize,ysize,temp,xsize,ysize,raster_type,int32(0),int32(0))
+        io_error = GDALRasterIO(raster[i], 0, int32(0), int32(0),xsize,ysize,temp,xsize,ysize,raster_type,int32(0),int32(0))    
+        if io_error == CE_Failure
+            error("Failed to read raster band $i")
+        end
         data[:,:,i] = temp'
     end
     transform = zeros(Float64,6)
