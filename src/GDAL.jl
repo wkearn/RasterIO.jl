@@ -71,7 +71,7 @@ function open_raster(input::ASCIIString, band::Int, access::Int)
     return map
 end
 
-# Multiple band import (beta)
+# Multiple band import
 function open_raster(input::ASCIIString, access::Int)
     dataset = GDALOpen(input,int32(access))
     bandcount = GDALGetRasterCount(dataset)
