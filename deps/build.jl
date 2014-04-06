@@ -15,4 +15,4 @@ end
 provides(Yum,
          {"gdal"=>libgdal})
 
-@BinDeps.install
+@BinDeps.install [:libgdal => :libgdal]
