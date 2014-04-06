@@ -133,10 +133,13 @@ function write_raster(raster::Raster,destination::ASCIIString,drivername::ASCIIS
     if proj_error == CE_Failure
         error("Failed to set projection")
     end
-    dstband = GDALGetRasterBand(dstdataset,int32(1))
-    io_error = GDALRasterIO(dstband,1,int32(0),int32(0),raster.width,raster.height,raster.data',raster.width,raster.height,GDALdatatype,int32(0),int32(0))
-    if io_error == CE_Failure
-        error("Failed to read raster band")
+    bandcount = size(raster.data)[3]
+    for i=1:bandcount
+        dstband = GDALGetRasterBand(dstdataset,int32(i))
+        io_error = GDALRasterIO(dstband,1,int32(0),int32(0),raster.width,raster.height,raster.data[:,:,i]',raster.width,raster.height,GDALdatatype,int32(0),int32(0))
+        if io_error == CE_Failure
+            error("Failed to read raster band")
+        end
     end
     GDALClose(dstdataset)
 end
