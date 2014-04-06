@@ -20,7 +20,6 @@ export
     GF_Read,GF_Write
 
 type Raster{T,N}
-    ptr::Ptr{Void}
     width::Int32
     height::Int32
     transform::Array{Float64,1}
@@ -109,21 +108,9 @@ function open_raster(input::ASCIIString, access::Int=GA_ReadOnly)
     transform = zeros(Float64,6)
     GDALGetGeoTransform(dataset,transform)
     projection = bytestring(GDALGetProjectionRef(dataset))
-    map = Raster(dataset,xsize,ysize,transform,projection,data)
+    map = Raster(xsize,ysize,transform,projection,data)
+    GDALClose(dataset)
     return map
-end
-
-
-function copy_raster(raster::Raster,destination::ASCIIString,drivername::ASCIIString)
-    if !driver_test(drivername)
-        error("Requested driver not present")
-    end
-    if !check_create(drivername,1)
-        error("Driver does not support the CreateCopy method.")
-    end
-    driver = GDALGetDriverByName(drivername)
-    dstdataset = GDALCreateCopy(driver,destination,raster.ptr,false,C_NULL,C_NULL,C_NULL)
-    GDALClose(dstdataset)
 end
 
 function write_raster(raster::Raster,destination::ASCIIString,drivername::ASCIIString, GDALdatatype::Int)
