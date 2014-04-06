@@ -177,8 +177,8 @@ end
 ## Useful little functions
 
 function gdal_translate(source::ASCIIString,destination::ASCIIString,dstdriver::ASCIIString)
-    raster = open_raster(source,1,GA_ReadOnly)
-    copy_raster(raster,destination,dstdriver)
+    raster = open_raster(source,GA_ReadOnly)
+    write_raster(raster,destination,dstdriver,eval(parse(string("GDT_",eltype(raster.data)))))
 end
 
 end
