@@ -1,5 +1,6 @@
 module GDAL
 
+include("../deps/build.jl")
 include("GDALfuns.jl")
 
 ## Call GDALAllRegister upon loading the module
