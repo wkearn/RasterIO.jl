@@ -6,7 +6,7 @@ julia:
   - nightly
 notifications:
   email: false
-before-install:
+before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq gdal
 script:
