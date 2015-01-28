@@ -1,4 +1,4 @@
-module GDAL
+module RasterIO
 
 include("GDALfuns.jl")
 
