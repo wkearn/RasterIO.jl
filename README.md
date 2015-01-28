@@ -1,6 +1,9 @@
 RasterIO.jl
 =======
 
+[![Build Status](https://travis-ci.org/wkearn/RasterIO.jl.svg?branch=master)](https://travis-ci.org/wkearn/RasterIO.jl)
+[![Coverage Status](https://coveralls.io/repos/wkearn/RasterIO.jl/badge.svg)](https://coveralls.io/r/wkearn/RasterIO.jl)
+
 Raster input/output functions using GDAL as a backend (formerly known as GDAL.jl)
 
 ## Installation ##
