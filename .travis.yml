@@ -6,6 +6,9 @@ julia:
   - nightly
 notifications:
   email: false
+before-install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq gdal
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia --check-bounds=yes -e 'Pkg.clone(pwd()); Pkg.build("RasterIO"); Pkg.test("RasterIO"; coverage=true)'
