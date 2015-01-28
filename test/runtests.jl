@@ -1,6 +1,4 @@
-include("../src/GDAL.jl")
-
-using GDAL
+using RasterIO
 using Base.Test
 
 # Check to make sure the drivers are properly registered
