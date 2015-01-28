@@ -1,6 +1,7 @@
 module RasterIO
 
 include("GDALfuns.jl")
+include("raster.jl")
 
 ## Call GDALAllRegister upon loading the module
 GDALAllRegister()
@@ -18,40 +19,6 @@ export
     GDT_Unknown, GDT_Byte, GDT_UInt16, GDT_Int16,GDT_UInt32,GDT_Float32,GDT_Float64,
     GA_ReadOnly,GA_Update
     GF_Read,GF_Write
-
-type Raster{T,N}
-    width::Int32
-    height::Int32
-    transform::Array{Float64,1}
-    projection::ASCIIString
-    data::Array{T,N}
-end
-
-
-## Naively convert from GDAL types to Julia types
-
-function raster_type_convert(raster_type)
-    if raster_type == 0
-        raster_jtype = Any
-    elseif raster_type == 1
-        raster_jtype = Uint8
-    elseif raster_type == 2
-        raster_jtype = Uint16
-    elseif raster_type == 3
-        raster_jtype = Int16
-    elseif raster_type == 4
-        raster_jtype = Uint32
-    elseif raster_type == 5
-        raster_jtype = Int32
-    elseif raster_type == 6
-        raster_jtype = Float32
-    elseif raster_type == 7
-        raster_jtype = Float64
-    else
-        error("Type of raster not yet supported")
-    end
-end
-
 
 ### High Level API functions
 
@@ -92,8 +59,8 @@ function open_raster(input::ASCIIString, access::Int=GA_ReadOnly)
     for i in 1:bandcount
         raster[i] = GDALGetRasterBand(dataset,int32(i))
     end
-    xsize = GDALGetRasterXSize(dataset)
-    ysize = GDALGetRasterYSize(dataset)
+    xsize = int(GDALGetRasterXSize(dataset))
+    ysize = int(GDALGetRasterYSize(dataset))
     raster_type = GDALGetRasterDataType(raster[1]) #Assumes each band is the same type
     raster_jtype = raster_type_convert(raster_type)
     data = zeros(raster_jtype,ysize,xsize,bandcount)
