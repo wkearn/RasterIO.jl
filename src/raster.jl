@@ -4,7 +4,13 @@ type Raster{T,N}
     transform::Array{Float64,1}
     projection::ASCIIString
     data::Array{T,N}
+    function Raster(width,height,transform,projection,data)
+        @assert size(data)[1:2] == (height,width)
+        new(width,height,transform,projection,data)
+    end
 end
+
+Raster{T,N}(width::Int,height::Int,transform::Array{Float64,1},projection::ASCIIString,data::Array{T,N}) = Raster{T,N}(width,height,transform,projection,data)
 
 
 ## Naively convert from GDAL types to Julia types
