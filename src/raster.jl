@@ -12,6 +12,12 @@ end
 
 Raster{T,N}(width::Int,height::Int,transform::Array{Float64,1},projection::ASCIIString,data::Array{T,N}) = Raster{T,N}(width,height,transform,projection,data)
 
+#######
+# Functions operating on the raster type
+
+Base.size(r::Raster) = (r.width,r.height)
+Base.size(r::Raster,d) = size(r)[d]
+
 
 ## Naively convert from GDAL types to Julia types
 
