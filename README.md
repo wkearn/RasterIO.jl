@@ -1,11 +1,13 @@
-GDAL.jl
+RasterIO.jl
 =======
 
-Julia wrapper for the Geospatial Data Analysis library
+Raster input/output functions using GDAL as a backend (formerly known as GDAL.jl)
 
 ## Installation ##
 
-	Pkg.clone("git://github.com/wkearn/GDAL.jl.git")
+This package is not yet registered in METADATA, so
+
+	Pkg.clone("git://github.com/wkearn/RasterIO.jl")
 
 ## Provided Types ##
 
@@ -24,7 +26,7 @@ A raster type consisting of a pointer to the raster dataset (not to the individu
 
 	open_raster(input::String,access::Int32=GA_ReadOnly)
 
-Opens the specified raster file using GDAL and returns a Raster. Access is 0 for ReadOnly and 1 for Update, or use GA\_ReadOnly and GA\_Update. Default passed when you called `open_raster(input)` is GA_ReadOnly. This has recently been changed to always import every band from a raster, making it more generally applicable. A forthcoming method will allow you to selectively import bands.
+Opens the specified raster file using GDAL and returns a Raster. Access is 0 for ReadOnly and 1 for Update, or use GA\_ReadOnly and GA\_Update. Default passed when you called `open_raster(input)` is GA_ReadOnly. This has recently been changed to always import every band from a raster, making it more generally applicable.
 
 	copy_raster(raster::Raster,destination::ASCIIString,driver::ASCIIString)
 
@@ -52,11 +54,7 @@ Checks whether the given driver supports the Create() or CreateCopy() methods in
 
 ## Usage ##
 
-If you had a raster map, say a digital elevation model, stored as a GeoTiff in "dem.tif," `dem = open_raster("dem.tif",1,GA_ReadOnly)` would return a Raster type object with fields giving you the width and height of the raster, the geotransform as output by GDAL, and the projection in OpenGIS WKT format. If you wanted to display the raster using ImageView, for instance, use the [GIS.jl](https://github.com/wkearn/GIS.jl) package:
-
-	using GIS
-	dem = open_raster("dem.tif")
-	display(dem)
+If you had a raster map, say a digital elevation model, stored as a GeoTiff in "dem.tif," `dem = open_raster("dem.tif",GA_ReadOnly)` would return a Raster type object with fields giving you the width and height of the raster, the geotransform as output by GDAL, and the projection in OpenGIS WKT format.
 
 To write the loaded raster to a driver that supports the Create() method, `write_raster(dem,"dem.cdf","netCDF",GDT_Float32)`. This writes your DEM to dem.cdf in NetCDF format using a 32-bit floating point type. `copy_raster(dem,"dem.cdf","netCDF")` will do the same by calling GDALCreateCopy() which is supported on a different set of drivers than Create(). Use `check_create` to determine which drivers support which methods.
 
@@ -64,5 +62,4 @@ To write the loaded raster to a driver that supports the Create() method, `write
 
 1. Figure out a better way to handle the GDALDatatype and Julia datatypes interface. Currently, it can't handle complex types, mostly because I haven't thought hard enough about them.
 2. Write a parser for the projection strings, so we can do useful things with the projection.
-3. Come up with a good way to display rasters using the georeferenced coordinates (see [GIS.jl](https://github.com/wkearn/GIS.jl))
-4. Add support for missing data. Maybe using DataArrays. How does GDAL handle missing data?
+3. Add support for missing data. Maybe using DataArrays. How does GDAL handle missing data?
