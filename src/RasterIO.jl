@@ -16,9 +16,9 @@ export
     # Other useful functions
     gdal_translate,
     # Constants
-    GDT_Unknown, GDT_Byte, GDT_UInt16, GDT_Int16,GDT_UInt32,GDT_Float32,GDT_Float64,
-    GA_ReadOnly,GA_Update
-    GF_Read,GF_Write
+    GDT_Unknown, GDT_Byte, GDT_UInt16, GDT_Int16, GDT_UInt32, GDT_Int32, GDT_Float32, GDT_Float64,
+    GA_ReadOnly, GA_Update,
+    GF_Read, GF_Write
 
 ### High Level API functions
 
@@ -88,7 +88,8 @@ function write_raster(raster::Raster,destination::ASCIIString,drivername::ASCIIS
         error("Driver does not support the Create method. Try using copy_raster")
     end
     driver = GDALGetDriverByName(drivername)
-    dstdataset = GDALCreate(driver,destination,raster.width,raster.height,int32(1),int32(GDALdatatype),ASCIIString[])
+    bandcount = size(raster.data, 3)
+    dstdataset = GDALCreate(driver,destination,raster.width,raster.height,int32(bandcount),int32(GDALdatatype),ASCIIString[])
     if dstdataset == C_NULL
         error("Failed to write dataset")
     end
@@ -100,7 +101,7 @@ function write_raster(raster::Raster,destination::ASCIIString,drivername::ASCIIS
     if proj_error == CE_Failure
         error("Failed to set projection")
     end
-    bandcount = size(raster.data)[3]
+
     for i=1:bandcount
         dstband = GDALGetRasterBand(dstdataset,int32(i))
         io_error = GDALRasterIO(dstband,1,int32(0),int32(0),raster.width,raster.height,raster.data[:,:,i]',raster.width,raster.height,GDALdatatype,int32(0),int32(0))
