@@ -1,12 +1,14 @@
 module RasterIO
 
+using Compat
+
 include("GDALfuns.jl")
 include("raster.jl")
 
 ## Call GDALAllRegister upon loading the module
 GDALAllRegister()
 
-export 
+export
     # Types
     Raster,
     # High-level API functions
@@ -50,23 +52,23 @@ export
 
 # Multiple band import
 function open_raster(input::ASCIIString, access::Int=GA_ReadOnly)
-    dataset = GDALOpen(input,int32(access))
+    @compat dataset = GDALOpen(input,Int32(access))
     if dataset == C_NULL
         error("Could not open input")
     end
     bandcount = GDALGetRasterCount(dataset)
-    raster = zeros(Ptr{None},bandcount)
+    @compat raster = fill(Ptr{Void}(0), bandcount)
     for i in 1:bandcount
-        raster[i] = GDALGetRasterBand(dataset,int32(i))
+        @compat raster[i] = GDALGetRasterBand(dataset,Int32(i))
     end
-    xsize = int(GDALGetRasterXSize(dataset))
-    ysize = int(GDALGetRasterYSize(dataset))
+    @compat xsize = Int(GDALGetRasterXSize(dataset))
+    @compat ysize = Int(GDALGetRasterYSize(dataset))
     raster_type = GDALGetRasterDataType(raster[1]) #Assumes each band is the same type
     raster_jtype = raster_type_convert(raster_type)
     data = zeros(raster_jtype,ysize,xsize,bandcount)
     for i in 1:bandcount
         temp = zeros(raster_jtype,xsize,ysize)
-        io_error = GDALRasterIO(raster[i], 0, int32(0), int32(0),xsize,ysize,temp,xsize,ysize,raster_type,int32(0),int32(0))    
+        @compat io_error = GDALRasterIO(raster[i], 0, Int32(0), Int32(0),xsize,ysize,temp,xsize,ysize,raster_type,Int32(0),Int32(0))
         if io_error == CE_Failure
             error("Failed to read raster band $i")
         end
@@ -89,7 +91,7 @@ function write_raster(raster::Raster,destination::ASCIIString,drivername::ASCIIS
     end
     driver = GDALGetDriverByName(drivername)
     bandcount = size(raster.data, 3)
-    dstdataset = GDALCreate(driver,destination,raster.width,raster.height,int32(bandcount),int32(GDALdatatype),ASCIIString[])
+    @compat dstdataset = GDALCreate(driver,destination,raster.width,raster.height,Int32(bandcount),Int32(GDALdatatype),ASCIIString[])
     if dstdataset == C_NULL
         error("Failed to write dataset")
     end
@@ -103,8 +105,8 @@ function write_raster(raster::Raster,destination::ASCIIString,drivername::ASCIIS
     end
 
     for i=1:bandcount
-        dstband = GDALGetRasterBand(dstdataset,int32(i))
-        io_error = GDALRasterIO(dstband,1,int32(0),int32(0),raster.width,raster.height,raster.data[:,:,i]',raster.width,raster.height,GDALdatatype,int32(0),int32(0))
+        @compat dstband = GDALGetRasterBand(dstdataset,Int32(i))
+        @compat io_error = GDALRasterIO(dstband,1,Int32(0),Int32(0),raster.width,raster.height,raster.data[:,:,i]',raster.width,raster.height,GDALdatatype,Int32(0),Int32(0))
         if io_error == CE_Failure
             error("Failed to read raster band")
         end
