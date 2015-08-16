@@ -27,7 +27,7 @@ const GMF_ALPHA = 0x04
 const GMF_NODATA = 0x08
 # Skipping MacroDefinition: GDAL_CHECK_VERSION(pszCallingComponentName)GDALCheckVersion(GDAL_VERSION_MAJOR,GDAL_VERSION_MINOR,pszCallingComponentName)
 # begin enum GDALDataType
-typealias GDALDataType Uint32
+typealias GDALDataType UInt32
 const GDT_Unknown = 0
 const GDT_Byte = 1
 const GDT_UInt16 = 2
@@ -43,7 +43,7 @@ const GDT_CFloat64 = 11
 const GDT_TypeCount = 12
 # end enum GDALDataType
 # begin enum GDALAsyncStatusType
-typealias GDALAsyncStatusType Uint32
+typealias GDALAsyncStatusType UInt32
 const GARIO_PENDING = 0
 const GARIO_UPDATE = 1
 const GARIO_ERROR = 2
@@ -51,17 +51,17 @@ const GARIO_COMPLETE = 3
 const GARIO_TypeCount = 4
 # end enum GDALAsyncStatusType
 # begin enum GDALAccess
-typealias GDALAccess Uint32
+typealias GDALAccess UInt32
 const GA_ReadOnly = 0
 const GA_Update = 1
 # end enum GDALAccess
 # begin enum GDALRWFlag
-typealias GDALRWFlag Uint32
+typealias GDALRWFlag UInt32
 const GF_Read = 0
 const GF_Write = 1
 # end enum GDALRWFlag
 # begin enum GDALColorInterp
-typealias GDALColorInterp Uint32
+typealias GDALColorInterp UInt32
 const GCI_Undefined = 0
 const GCI_GrayIndex = 1
 const GCI_PaletteIndex = 2
@@ -82,29 +82,29 @@ const GCI_YCbCr_CrBand = 16
 const GCI_Max = 16
 # end enum GDALColorInterp
 # begin enum GDALPaletteInterp
-typealias GDALPaletteInterp Uint32
+typealias GDALPaletteInterp UInt32
 const GPI_Gray = 0
 const GPI_RGB = 1
 const GPI_CMYK = 2
 const GPI_HLS = 3
 # end enum GDALPaletteInterp
-typealias GDALMajorObjectH Ptr{None}
-typealias GDALDatasetH Ptr{None}
-typealias GDALRasterBandH Ptr{None}
-typealias GDALDriverH Ptr{None}
-typealias GDALProjDefH Ptr{None}
-typealias GDALColorTableH Ptr{None}
-typealias GDALRasterAttributeTableH Ptr{None}
-typealias GDALAsyncReaderH Ptr{None}
+typealias GDALMajorObjectH Ptr{Void}
+typealias GDALDatasetH Ptr{Void}
+typealias GDALRasterBandH Ptr{Void}
+typealias GDALDriverH Ptr{Void}
+typealias GDALProjDefH Ptr{Void}
+typealias GDALColorTableH Ptr{Void}
+typealias GDALRasterAttributeTableH Ptr{Void}
+typealias GDALAsyncReaderH Ptr{Void}
 typealias GDALDerivedPixelFunc Ptr{Void}
 # begin enum GDALRATFieldType
-typealias GDALRATFieldType Uint32
+typealias GDALRATFieldType UInt32
 const GFT_Integer = 0
 const GFT_Real = 1
 const GFT_String = 2
 # end enum GDALRATFieldType
 # begin enum GDALRATFieldUsage
-typealias GDALRATFieldUsage Uint32
+typealias GDALRATFieldUsage UInt32
 const GFU_Generic = 0
 const GFU_PixelCount = 1
 const GFU_Name = 2
@@ -139,7 +139,7 @@ const INTEROPERABILITYOFFSET = 0xA005
 const GPSOFFSETTAG = 0x8825
 const MAXSTRINGLENGTH = 65535
 # begin enum TIFFDataType
-typealias TIFFDataType Uint32
+typealias TIFFDataType UInt32
 const TIFF_NOTYPE = 0
 const TIFF_BYTE = 1
 const TIFF_ASCII = 2
@@ -156,7 +156,7 @@ const TIFF_DOUBLE = 12
 const TIFF_IFD = 13
 # end enum TIFFDataType
 # begin enum GDALResampleAlg
-typealias GDALResampleAlg Uint32
+typealias GDALResampleAlg UInt32
 const GRA_NearestNeighbour = 0
 const GRA_Bilinear = 1
 const GRA_Cubic = 2
@@ -166,12 +166,12 @@ const GRA_Average = 5
 const GRA_Mode = 6
 # end enum GDALResampleAlg
 typealias GDALMaskFunc Ptr{Void}
-typealias GDALWarpOperationH Ptr{None}
+typealias GDALWarpOperationH Ptr{Void}
 typealias GDALTransformerFunc Ptr{Void}
 typealias GDALContourWriter Ptr{Void}
-typealias GDALContourGeneratorH Ptr{None}
+typealias GDALContourGeneratorH Ptr{Void}
 # begin enum GDALGridAlgorithm
-typealias GDALGridAlgorithm Uint32
+typealias GDALGridAlgorithm UInt32
 const GGA_InverseDistanceToAPower = 1
 const GGA_MovingAverage = 2
 const GGA_NearestNeighbor = 3
@@ -193,7 +193,7 @@ const GDAL_RELEASE_NAME = "1.10.1"
 typealias GDALGridFunction Ptr{Void}
 const MAX_ULPS = 10
 # begin enum GDALBurnValueSrc
-typealias GDALBurnValueSrc Uint32
+typealias GDALBurnValueSrc UInt32
 const GBV_UserBurnValue = 0
 const GBV_Z = 1
 const GBV_M = 2
@@ -226,22 +226,22 @@ const GPF_AUXMODE = 0x08
 const GPF_NOSAVE = 0x10
 const VRT_NODATA_UNSET = -1234.56
 typealias VRTImageReadFunc Ptr{Void}
-typealias VRTDriverH Ptr{None}
-typealias VRTSourceH Ptr{None}
-typealias VRTSimpleSourceH Ptr{None}
-typealias VRTAveragedSourceH Ptr{None}
-typealias VRTComplexSourceH Ptr{None}
-typealias VRTFilteredSourceH Ptr{None}
-typealias VRTKernelFilteredSourceH Ptr{None}
-typealias VRTAverageFilteredSourceH Ptr{None}
-typealias VRTFuncSourceH Ptr{None}
-typealias VRTDatasetH Ptr{None}
-typealias VRTWarpedDatasetH Ptr{None}
-typealias VRTRasterBandH Ptr{None}
-typealias VRTSourcedRasterBandH Ptr{None}
-typealias VRTWarpedRasterBandH Ptr{None}
-typealias VRTDerivedRasterBandH Ptr{None}
-typealias VRTRawRasterBandH Ptr{None}
+typealias VRTDriverH Ptr{Void}
+typealias VRTSourceH Ptr{Void}
+typealias VRTSimpleSourceH Ptr{Void}
+typealias VRTAveragedSourceH Ptr{Void}
+typealias VRTComplexSourceH Ptr{Void}
+typealias VRTFilteredSourceH Ptr{Void}
+typealias VRTKernelFilteredSourceH Ptr{Void}
+typealias VRTAverageFilteredSourceH Ptr{Void}
+typealias VRTFuncSourceH Ptr{Void}
+typealias VRTDatasetH Ptr{Void}
+typealias VRTWarpedDatasetH Ptr{Void}
+typealias VRTRasterBandH Ptr{Void}
+typealias VRTSourcedRasterBandH Ptr{Void}
+typealias VRTWarpedRasterBandH Ptr{Void}
+typealias VRTDerivedRasterBandH Ptr{Void}
+typealias VRTRawRasterBandH Ptr{Void}
 
 # CPLErr Data Type: added by hand from cplerror.h
 

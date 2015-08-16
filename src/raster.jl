@@ -25,13 +25,13 @@ function raster_type_convert(raster_type)
     if raster_type == 0
         raster_jtype = Any
     elseif raster_type == 1
-        raster_jtype = Uint8
+        raster_jtype = UInt8
     elseif raster_type == 2
-        raster_jtype = Uint16
+        raster_jtype = UInt16
     elseif raster_type == 3
         raster_jtype = Int16
     elseif raster_type == 4
-        raster_jtype = Uint32
+        raster_jtype = UInt32
     elseif raster_type == 5
         raster_jtype = Int32
     elseif raster_type == 6
