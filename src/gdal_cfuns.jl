@@ -66,9 +66,9 @@ function GDALOpenShared(arg1::Ptr{Uint8},arg2::GDALAccess)
     ccall((:GDALOpenShared,libgdal),GDALDatasetH,(Ptr{Uint8},GDALAccess),arg1,arg2)
 end
 
-function GDALDumpOpenDatasets(arg1::Ptr{FILE})
-    ccall((:GDALDumpOpenDatasets,libgdal),Cint,(Ptr{FILE},),arg1)
-end
+# function GDALDumpOpenDatasets(arg1::Ptr{FILE})
+#     ccall((:GDALDumpOpenDatasets,libgdal),Cint,(Ptr{FILE},),arg1)
+# end
 
 function GDALGetDriverByName(arg1::Ptr{Uint8})
     ccall((:GDALGetDriverByName,libgdal),GDALDriverH,(Ptr{Uint8},),arg1)
@@ -530,8 +530,8 @@ function GDALCopyWords(pSrcData::Ptr{Void},eSrcType::GDALDataType,nSrcPixelOffse
     ccall((:GDALCopyWords,libgdal),Void,(Ptr{Void},GDALDataType,Cint,Ptr{Void},GDALDataType,Cint,Cint),pSrcData,eSrcType,nSrcPixelOffset,pDstData,eDstType,nDstPixelOffset,nWordCount)
 end
 
-function GDALCopyBits(pabySrcData::Ptr{GByte},nSrcOffset::Cint,nSrcStep::Cint,pabyDstData::Ptr{GByte},nDstOffset::Cint,nDstStep::Cint,nBitCount::Cint,nStepCount::Cint)
-    ccall((:GDALCopyBits,libgdal),Void,(Ptr{GByte},Cint,Cint,Ptr{GByte},Cint,Cint,Cint,Cint),pabySrcData,nSrcOffset,nSrcStep,pabyDstData,nDstOffset,nDstStep,nBitCount,nStepCount)
+function GDALCopyBits(pabySrcData::Ptr{UInt8},nSrcOffset::Cint,nSrcStep::Cint,pabyDstData::Ptr{UInt8},nDstOffset::Cint,nDstStep::Cint,nBitCount::Cint,nStepCount::Cint)
+    ccall((:GDALCopyBits,libgdal),Void,(Ptr{UInt8},Cint,Cint,Ptr{UInt8},Cint,Cint,Cint,Cint),pabySrcData,nSrcOffset,nSrcStep,pabyDstData,nDstOffset,nDstStep,nBitCount,nStepCount)
 end
 
 function GDALLoadWorldFile(arg1::Ptr{Uint8},arg2::Ptr{Cdouble})
@@ -738,9 +738,9 @@ function GDALRATTranslateToColorTable(arg1::GDALRasterAttributeTableH,nEntryCoun
     ccall((:GDALRATTranslateToColorTable,libgdal),GDALColorTableH,(GDALRasterAttributeTableH,Cint),arg1,nEntryCount)
 end
 
-function GDALRATDumpReadable(arg1::GDALRasterAttributeTableH,arg2::Ptr{FILE})
-    ccall((:GDALRATDumpReadable,libgdal),Void,(GDALRasterAttributeTableH,Ptr{FILE}),arg1,arg2)
-end
+# function GDALRATDumpReadable(arg1::GDALRasterAttributeTableH,arg2::Ptr{FILE})
+#     ccall((:GDALRATDumpReadable,libgdal),Void,(GDALRasterAttributeTableH,Ptr{FILE}),arg1,arg2)
+# end
 
 function GDALRATClone(arg1::GDALRasterAttributeTableH)
     ccall((:GDALRATClone,libgdal),GDALRasterAttributeTableH,(GDALRasterAttributeTableH,),arg1)
