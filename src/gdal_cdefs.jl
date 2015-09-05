@@ -512,6 +512,8 @@ const GRA_Mode = (UInt32)(6)
 # end enum GDALResampleAlg
 
 typealias GDALMaskFunc Ptr{Void}
+typealias GDALProgressFunc Ptr{Void}
+typealias GDALTransformerFunc Ptr{Void}
 
 type GDALWarpOptions
     papszWarpOptions::Ptr{Ptr{Uint8}}
