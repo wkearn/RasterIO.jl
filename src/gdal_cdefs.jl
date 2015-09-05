@@ -290,8 +290,8 @@ type GDALGridInverseDistanceToAPowerOptions
     dfRadius1::Cdouble
     dfRadius2::Cdouble
     dfAngle::Cdouble
-    nMaxPoints::GUInt32
-    nMinPoints::GUInt32
+    nMaxPoints::UInt32
+    nMinPoints::UInt32
     dfNoDataValue::Cdouble
 end
 
@@ -299,7 +299,7 @@ type GDALGridMovingAverageOptions
     dfRadius1::Cdouble
     dfRadius2::Cdouble
     dfAngle::Cdouble
-    nMinPoints::GUInt32
+    nMinPoints::UInt32
     dfNoDataValue::Cdouble
 end
 
@@ -314,7 +314,7 @@ type GDALGridDataMetricsOptions
     dfRadius1::Cdouble
     dfRadius2::Cdouble
     dfAngle::Cdouble
-    nMinPoints::GUInt32
+    nMinPoints::UInt32
     dfNoDataValue::Cdouble
 end
 
