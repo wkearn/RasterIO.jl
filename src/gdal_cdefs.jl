@@ -369,7 +369,7 @@ type GDALRasterBandPamInfo
     bHaveStats::Cint
     dfMean::Cdouble
     dfStdDev::Cdouble
-    psSavedHistograms::Ptr{CPLXMLNode}
+    psSavedHistograms::Ptr{Void} # Ptr{CPLXMLNode}
     poDefaultRAT::Ptr{Cint}
 end
 
@@ -488,7 +488,7 @@ type GDALGridPoint
 end
 
 type GDALGridExtraParameters
-    hQuadTree::Ptr{CPLQuadTree}
+    hQuadTree::Ptr{Void} # Ptr{CPLQuadTree}
     dfInitialSearchRadius::Cdouble
     pafX::Ptr{Cfloat}
     pafY::Ptr{Cfloat}
