@@ -46,8 +46,8 @@ function GDALAllRegister()
     ccall((:GDALAllRegister,libgdal),Void,())
 end
 
-function GDALCreate(hDriver::GDALDriverH,arg1::Ptr{Uint8},arg2::Cint,arg3::Cint,arg4::Cint,arg5::GDALDataType,arg6::Ptr{Ptr{Uint8}})
-    ccall((:GDALCreate,libgdal),GDALDatasetH,(GDALDriverH,Ptr{Uint8},Cint,Cint,Cint,GDALDataType,Ptr{Ptr{Uint8}}),hDriver,arg1,arg2,arg3,arg4,arg5,arg6)
+function GDALCreate(hDriver::GDALDriverH,arg1::Ptr{Uint8},arg2::Cint,arg3::Cint,arg4::Cint,arg5::GDALDataType,arg6) #::Ptr{Cstring})
+    ccall((:GDALCreate,libgdal),GDALDatasetH,(GDALDriverH,Ptr{Uint8},Cint,Cint,Cint,GDALDataType,Ptr{Void}),hDriver,arg1,arg2,arg3,arg4,arg5,arg6)
 end
 
 function GDALCreateCopy(arg1::GDALDriverH,arg2::Ptr{Uint8},arg3::GDALDatasetH,arg4::Cint,arg5::Ptr{Ptr{Uint8}},arg6::GDALProgressFunc,arg7::Ptr{Void})
