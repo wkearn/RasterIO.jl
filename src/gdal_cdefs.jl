@@ -554,3 +554,11 @@ type GDALWarpOptions
 end
 
 typealias GDALWarpOperationH Ptr{Void}
+
+# CPLErr Data Type: added by hand from cplerror.h
+typealias CPLErr Cint
+const CE_None = Cint(0)
+const CE_Debug = Cint(1)
+const CE_Warning = Cint(2)
+const CE_Failure = Cint(3)
+const CE_Fatal = Cint(4)
