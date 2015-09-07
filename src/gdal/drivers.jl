@@ -79,26 +79,65 @@ Fetch the driver that the dataset was created with GDALOpen()/GDALCreate().
 """ ->
 _dataset_driver(dataset::GDALDatasetH) = GDALGetDatasetDriver(dataset)
 
+@doc """
+Destroy a GDALDriver.
+
+This is roughly equivelent to deleting the driver, but is guaranteed to take place in the GDAL heap. It is important this that function not be called on a driver that is registered with the GDALDriverManager.
+
+Parameters:
+hDriver     the driver to destroy.
+""" ->
 # function GDALDestroyDriver(arg1::GDALDriverH)
 #     ccall((:GDALDestroyDriver,libgdal),Void,(GDALDriverH,),arg1)
 # end
 
+@doc "Register a driver for use." ->
 # function GDALRegisterDriver(arg1::GDALDriverH)
 #     ccall((:GDALRegisterDriver,libgdal),Cint,(GDALDriverH,),arg1)
 # end
 
+@doc "Deregister the passed driver." ->
 # function GDALDeregisterDriver(arg1::GDALDriverH)
 #     ccall((:GDALDeregisterDriver,libgdal),Void,(GDALDriverH,),arg1)
 # end
 
+@doc """
+Destroy the driver manager.
+
+Incidently unloads all managed drivers.
+
+NOTE: This function is not thread safe. It should not be called while other threads are actively using GDAL.
+""" ->
 # function GDALDestroyDriverManager()
 #     ccall((:GDALDestroyDriverManager,libgdal),Void,())
 # end
 
+@doc """
+Return the URL to the help that describes the driver.
+
+That URL is relative to the GDAL documentation directory.
+
+For the GeoTIFF driver, this is "frmt_gtiff.html"
+
+Parameters:
+hDriver     the handle of the driver
+Returns:
+the URL to the help that describes the driver or NULL. The returned string should not be freed and is owned by the driver.
+""" ->
 # function GDALGetDriverHelpTopic(arg1::GDALDriverH)
 #     ccall((:GDALGetDriverHelpTopic,libgdal),Ptr{Uint8},(GDALDriverH,),arg1)
 # end
 
+@doc """
+Return the list of creation options of the driver.
+
+Return the list of creation options of the driver used by Create() and CreateCopy() as an XML string
+
+Parameters:
+hDriver     the handle of the driver
+Returns:
+an XML string that describes the list of creation options or empty string. The returned string should not be freed and is owned by the driver.
+"""
 # function GDALGetDriverCreationOptionList(arg1::GDALDriverH)
 #     ccall((:GDALGetDriverCreationOptionList,libgdal),Ptr{Uint8},(GDALDriverH,),arg1)
 # end
