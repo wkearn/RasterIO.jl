@@ -18,6 +18,11 @@ wktstring(raster::Raster) = bytestring(_projection_ref(raster.dataset))
 driver(raster::Raster) = _driver_short_name(_dataset_driver(raster.dataset))
 dtype(rasterband::GDALRasterBandH) = _jl_type(Val{_band_type(rasterband)})
 
+# function gdal_translate(source::ASCIIString,destination::ASCIIString,dstdriver::ASCIIString)
+#     raster = open_raster(source,Int(GA_ReadOnly))
+#     write_raster(raster,destination,dstdriver,eval(parse(string("GDT_",eltype(raster.data)))))
+# end
+
 # Raster I/O
 openraster(filename::ASCIIString, access::GDALAccess=GA_ReadOnly) =
     Raster(_open(filename, access))
