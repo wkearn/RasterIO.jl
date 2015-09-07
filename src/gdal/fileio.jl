@@ -1,4 +1,4 @@
-@doc """
+"""
 Create a new dataset with this driver.
 
 What argument values are legal for particular drivers is driver specific,
@@ -26,7 +26,7 @@ options     list of driver specific control parameters.
 
 Returns:
 NULL on failure, or a new GDALDataset.
-""" ->
+"""
 function _create(driver::GDALDriverH, filename::Union(ASCIIString,UTF8String),
                  width::Int, height::Int, nband::Int, eType::GDALDataType,
                  options::Vector{ASCIIString}=Vector{ASCIIString}())
@@ -52,7 +52,7 @@ function _create(filename::Union(ASCIIString,UTF8String),
             options)
 end
 
-@doc """
+"""
 Create a copy of a dataset.
 
 This method will attempt to create a copy of a raster dataset with the
@@ -95,7 +95,7 @@ pProgressData   application data passed into progress function.
 
 Returns:
 a pointer to the newly created dataset (may be read-only access).
-""" ->
+"""
 
 function _create_copy(driver::GDALDriverH,
                       filename::Union(ASCIIString,UTF8String),
@@ -133,7 +133,7 @@ function _create_copy(filename::Union(ASCIIString,UTF8String),
                  options, pfnProgress, pProgressData)
 end
 
-@doc """
+"""
 Open a raster file as a GDALDataset.
 
 This function will try to open the passed file, or virtual dataset name by
@@ -170,40 +170,51 @@ eAccess         the desired access, either GA_Update or GA_ReadOnly. Many
 
 Returns:
 A GDALDatasetH handle or NULL on failure.
-""" ->
+"""
 function _open(filename::ASCIIString, access::GDALAccess=GA_ReadOnly)
     dataset = GDALOpen(pointer(filename), access)
     dataset == C_NULL && error("Could not open file \"$filename\"")
     dataset
 end
 
-@doc """
+"""
 Open a raster file as a GDALDataset.
 
-This function works the same as GDALOpen(), but allows the sharing of GDALDataset handles for a dataset with other callers to GDALOpenShared().
+This function works the same as GDALOpen(), but allows the sharing of
+GDALDataset handles for a dataset with other callers to GDALOpenShared().
 
-In particular, GDALOpenShared() will first consult it's list of currently open and shared GDALDataset's, and if the GetDescription() name for one exactly matches the pszFilename passed to GDALOpenShared() it will be referenced and returned.
+GDALOpenShared() will first consult its list of currently open and shared
+GDALDataset's, and if the GetDescription() name for one exactly matches the
+pszFilename passed to GDALOpenShared() it will be referenced and returned.
 
-Starting with GDAL 1.6.0, if GDALOpenShared() is called on the same pszFilename from two different threads, a different GDALDataset object will be returned as it is not safe to use the same dataset from different threads, unless the user does explicitly use mutexes in its code.
+Starting with GDAL 1.6.0, if GDALOpenShared() is called on the same pszFilename
+from two different threads, a different GDALDataset object will be returned as
+it is not safe to use the same dataset from different threads, unless the user
+does explicitly use mutexes in its code.
 
-For drivers supporting the VSI virtual file API, it is possible to open a file in a .zip archive (see VSIInstallZipFileHandler()), in a .tar/.tar.gz/.tgz archive (see VSIInstallTarFileHandler()) or on a HTTP / FTP server (see VSIInstallCurlFileHandler())
+For drivers supporting the VSI virtual file API, it is possible to open a file
+in a .zip archive (see VSIInstallZipFileHandler()), in a .tar/.tar.gz/.tgz
+archive (see VSIInstallTarFileHandler()) or on a HTTP / FTP server
+(see VSIInstallCurlFileHandler())
 
-In some situations (dealing with unverified data), the datasets can be opened in another process through the GDAL API Proxy mechanism.
+In some situations (dealing with unverified data), the datasets can be opened
+in another process through the GDAL API Proxy mechanism.
 
-See also:
-GDALOpen()
-GDALOpenEx()
 Parameters:
-pszFilename   the name of the file to access. In the case of exotic drivers this may not refer to a physical file, but instead contain information for the driver on how to access a dataset. It should be in UTF-8 encoding.
-eAccess   the desired access, either GA_Update or GA_ReadOnly. Many drivers support only read only access.
-Returns:
-A GDALDatasetH handle or NULL on failure. For C++ applications this handle can be cast to a GDALDataset *.
-""" ->
-# function GDALOpenShared(arg1::Ptr{Uint8},arg2::GDALAccess)
-#     ccall((:GDALOpenShared,libgdal),GDALDatasetH,(Ptr{Uint8},GDALAccess),arg1,arg2)
-# end
+pszFilename     the name of the file to access. In the case of exotic drivers
+                this may not refer to a physical file, but instead contain
+                information for the driver on how to access a dataset. It
+                should be in UTF-8 encoding.
+eAccess         the desired access, either GA_Update or GA_ReadOnly.
+                Many drivers support only read only access.
 
-@doc """
+Returns:
+A GDALDatasetH handle or NULL on failure.
+"""
+_open_shared(pszFilename::Ptr{Uint8}, eAccess::GDALAccess) =
+    GDALOpenShared(pszFilename, eAccess)::GDALDatasetH
+
+"""
 Close GDAL dataset.
 
 For non-shared datasets (opened with GDALOpen()) the dataset is closed
@@ -214,21 +225,23 @@ and closed only if the referenced count has dropped below 1.
 
 Parameters:
 hDS     The dataset to close.
-""" ->
+"""
 _close(dataset::GDALDatasetH) = GDALClose(dataset)
 
-@doc """
+"""
 Fetch files forming dataset.
 
-Returns a list of files believed to be part of this dataset. If it returns an empty list of files it means there is believed to be no local file system files associated with the dataset (for instance a virtual dataset). The returned file list is owned by the caller and should be deallocated with CSLDestroy().
+Returns a list of files believed to be part of this dataset. If it returns an
+empty list of files it means there is believed to be no local file system files
+associated with the dataset (for instance a virtual dataset). The returned file
+list is owned by the caller and should be deallocated with CSLDestroy().
 
-The returned filenames will normally be relative or absolute paths depending on the path used to originally open the dataset. The strings will be UTF-8 encoded.
-
-This method is the same as the C GDALGetFileList() function.
+The returned filenames will normally be relative or absolute paths depending on
+the path used to originally open the dataset. The strings will be UTF-8 encoded
 
 Returns:
 NULL or a NULL terminated array of file names.
-""" ->
-# function GDALGetFileList(arg1::GDALDatasetH)
-#     ccall((:GDALGetFileList,libgdal),Ptr{Ptr{Uint8}},(GDALDatasetH,),arg1)
+"""
+_get_filelist(dataset::GDALDatasetH) =
+    GDALGetFileList(dataset)::Ptr{Ptr{Uint8}}
 # end
