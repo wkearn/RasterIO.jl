@@ -252,7 +252,7 @@ Throws an error if the index is invalid.
 """ ->
 function _driver_by_index(i::Int)
     driver = GDALGetDriver(Cint(i-1))
-    driver == C_NULL || error("driver index $i is invalid")
+    driver == C_NULL && error("driver index $i is invalid")
     driver
 end
 
