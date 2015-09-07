@@ -1,24 +1,20 @@
-function _data_type(datatype::GDALDataType)
-    if datatype == 0
-        raster_jtype = Any
-    elseif datatype == 1
-        raster_jtype = Uint8
-    elseif datatype == 2
-        raster_jtype = Uint16
-    elseif datatype == 3
-        raster_jtype = Int16
-    elseif datatype == 4
-        raster_jtype = Uint32
-    elseif datatype == 5
-        raster_jtype = Int32
-    elseif datatype == 6
-        raster_jtype = Float32
-    elseif datatype == 7
-        raster_jtype = Float64
-    else
-        error("Type of raster not yet supported")
-    end
-end
+_jl_type(::Type{Val{GDT_Unknown}}) = Any
+_jl_type(::Type{Val{GDT_Byte}}) = UInt8
+_jl_type(::Type{Val{GDT_UInt16}}) = UInt16
+_jl_type(::Type{Val{GDT_Int16}}) = Int16
+_jl_type(::Type{Val{GDT_UInt32}}) = UInt32
+_jl_type(::Type{Val{GDT_Int32}}) = Int32
+_jl_type(::Type{Val{GDT_Float32}}) = Float32
+_jl_type(::Type{Val{GDT_Float64}}) = Float64
+
+_gdal_type(::Type{Val{Any}}) = GDT_Unknown
+_gdal_type(::Type{Val{Uint8}}) = GDT_Byte
+_gdal_type(::Type{Val{Uint16}}) = GDT_UInt16
+_gdal_type(::Type{Val{Int16}}) = GDT_Int16
+_gdal_type(::Type{Val{Uint32}}) = GDT_UInt32
+_gdal_type(::Type{Val{Int32}}) = GDT_Int32
+_gdal_type(::Type{Val{Float32}}) = GDT_Float32
+_gdal_type(::Type{Val{Float64}}) = GDT_Float64
 
 # --- Raster IO & Drivers ---
 
@@ -46,33 +42,34 @@ nXSize          width of created raster in pixels.
 nYSize          height of created raster in pixels.
 nBands          number of bands.
 eType           type of raster.
-papszOptions    list of driver specific control parameters.
+options     list of driver specific control parameters.
 
 Returns:
 NULL on failure, or a new GDALDataset.
 """ ->
 function _create(driver::GDALDriverH, filename::Union(ASCIIString,UTF8String),
                  width::Int, height::Int, nband::Int, eType::GDALDataType,
-                 apszOptions::Vector{ASCIIString}=Vector{ASCIIString}())
+                 options::Vector{ASCIIString}=Vector{ASCIIString}())
     pfilename = pointer(filename)
     dataset = GDALCreate(driver, pfilename, Cint(width), Cint(height),
-                         Cint(nband), eType, pointer(papszOptions))
+                         Cint(nband), eType, Ptr{Ptr{UInt8}}(pointer(options)))
     dataset == C_NULL && error("Failed to write dataset")
     dataset
 end
 
-function _create(driver::ASCIIString, filename::Union(ASCIIString,UTF8String),
+function _create(drivername::ASCIIString,
+                 filename::Union(ASCIIString,UTF8String),
                  width::Int, height::Int, nband::Int, eType::GDALDataType,
-                 apszOptions::Vector{ASCIIString}=Vector{ASCIIString}())
+                 options::Vector{ASCIIString}=Vector{ASCIIString}())
     _create(_driver_by_name(drivername), filename, width, height, nband, eType,
-            papszOptions)
+            options)
 end
 
 function _create(filename::Union(ASCIIString,UTF8String),
                  width::Int, height::Int, nband::Int, eType::GDALDataType,
-                 apszOptions::Vector{ASCIIString}=Vector{ASCIIString}())
+                 options::Vector{ASCIIString}=Vector{ASCIIString}())
     _create(_identify_driver(filename), filename, width, height, nband, eType,
-            papszOptions)
+            options)
 end
 
 @doc """
@@ -124,12 +121,13 @@ function _create_copy(driver::GDALDriverH,
                       filename::Union(ASCIIString,UTF8String),
                       source::GDALDatasetH,
                       bStrict::Cint=0,
-                      apszOptions::Vector{ASCIIString}=Vector{ASCIIString}(),
+                      options::Vector{ASCIIString}=Vector{ASCIIString}(),
                       pfnProgress::GDALProgressFunc=C_NULL,
                       pProgressData::Ptr{Void}=C_NULL)
     source == C_NULL && error("NULL source dataset")
     dataset = GDALCreateCopy(driver, pointer(filename), source, bStrict,
-                             pointer(papszOptions), pfnProgress, pProgressData)
+                             Ptr{Ptr{UInt8}}(pointer(options)),
+                             pfnProgress, pProgressData)
     dataset == C_NULL && error("Failed to copy dataset")
     dataset
 end
@@ -138,17 +136,17 @@ function _create_copy(drivername::ASCIIString,
                       filename::Union(ASCIIString,UTF8String),
                       source::GDALDatasetH,
                       bStrict::Cint=0,
-                      apszOptions::Vector{ASCIIString}=Vector{ASCIIString}(),
+                      options::Vector{ASCIIString}=Vector{ASCIIString}(),
                       pfnProgress::GDALProgressFunc=C_NULL,
                       pProgressData::Ptr{Void}=C_NULL)
     _create_copy(_driver_by_name(drivername), filename, source, bStrict,
-                 papszOptions, pfnProgress, pProgressData)
+                 options, pfnProgress, pProgressData)
 end
 
 function _create_copy(filename::Union(ASCIIString,UTF8String),
                       source::GDALDatasetH,
                       bStrict::Cint=0,
-                      apszOptions::Vector{ASCIIString}=Vector{ASCIIString}(),
+                      options::Vector{ASCIIString}=Vector{ASCIIString}(),
                       pfnProgress::GDALProgressFunc=C_NULL,
                       pProgressData::Ptr{Void}=C_NULL)
     _create_copy(_identify_driver(filename), filename, source, bStrict,
@@ -184,7 +182,7 @@ be cast to a GDALDriver *.
 function _identify_driver(filename::ASCIIString,
                           filelist::Vector{ASCIIString}=Vector{ASCIIString}())
     driver = GDALIdentifyDriver(pointer(filename), pointer(filelist))
-    driver == NULL && error("Could not identify driver")
+    driver == C_NULL && error("Could not identify driver")
     driver
 end
 
@@ -239,7 +237,7 @@ Returns NULL if no match is found.
 """ ->
 function _driver_by_name(drivername::ASCIIString)
     driver = GDALGetDriverByName(pointer(drivername))
-    driver == NULL && error("Could not find driver $drivername")
+    driver == C_NULL && error("Could not find driver $drivername")
     driver
 end
 
@@ -265,6 +263,7 @@ This name can be passed to the GDALGetDriverByName() function.
 The returned string should not be freed and is owned by the driver.
 """ ->
 _driver_short_name(ptr::GDALDriverH) = GDALGetDriverShortName(ptr)
+_driver_short_name(i::Int) = GDALGetDriverShortName(_driver_by_index(i))
 
 @doc """
 Return the long name of a driver (e.g. "GeoTIFF"), or empty string.
@@ -272,11 +271,12 @@ Return the long name of a driver (e.g. "GeoTIFF"), or empty string.
 The returned string should not be freed and is owned by the driver.
 """ ->
 _driver_long_name(ptr::GDALDriverH) = GDALGetDriverLongName(ptr)
+_driver_long_name(i::Int) = GDALGetDriverLongName(_driver_by_index(i))
 
 @doc """
 Fetch the driver that the dataset was created with GDALOpen()/GDALCreate().
 """ ->
-dataset_driver(dataset::GDALDatasetH) = GDALGetDatasetDriver(dataset)
+_dataset_driver(dataset::GDALDatasetH) = GDALGetDatasetDriver(dataset)
 
 @doc """
 Close GDAL dataset.
@@ -319,9 +319,9 @@ See also: http://www.gdal.org/ogr/osr_tutorial.html
 _projection_ref(dataset::GDALDatasetH) = GDALGetProjectionRef(dataset)
 
 @doc "Set the projection reference string for this dataset." ->
-function _set_projection!(dataset::GDALDatasetH, projstring::ACSIIString)
+function _set_projection!(dataset::GDALDatasetH, projstring::ASCIIString)
     result = GDALSetProjection(dataset, pointer(projstring))
-    result == CE_None || error("Could not set projection")
+    result == CE_Failure && error("Could not set projection")
 end
 
 @doc """
@@ -347,19 +347,22 @@ buffer   a six double buffer into which the transformation will be placed.
 Returns:
 CE_None on success, or CE_Failure if no transform can be fetched.
 """ ->
-function _get_geo_transform!(dataset::GDALDatasetH, buffer::Vector{Cdouble})
+function _get_geotransform!(dataset::GDALDatasetH, buffer::Vector{Cdouble})
     @assert length(buffer) == 6
     result = GDALGetGeoTransform(dataset, pointer(buffer))
-    result == CE_None || error("Failed to transform raster dataset")
+    (result == CE_Failure) && error("Failed to get geo transformation from raster")
     buffer
 end
 
 @doc "Set the affine transformation coefficients." ->
-function GDALSetGeoTransform(dataset::GDALDatasetH, transform::Vector{Cdouble})
+function _set_geotransform!(dataset::GDALDatasetH, transform::Vector{Cdouble})
     @assert length(buffer) == 6
-    result = GDALGetGeoTransform(dataset, pointer(transform))
-    result == CE_None || error("Failed to transform raster dataset")
+    result = GDALSetGeoTransform(dataset, pointer(transform))
+    (result == CE_Failure) && error("Failed to transform raster dataset")
 end
+
+@doc "Return access flag."
+_access_mode(dataset::GDALDatasetH) = GDALGetAccess(dataset)
 
 # --- Raster Bands ---
 
@@ -451,21 +454,41 @@ CE_Failure if the access fails, otherwise CE_None.
 """-> 
 function _raster_io!{T <: Real}(rasterband::GDALRasterBandH,
                                 buffer::Array{T,2},
-                                eRWFlag::GDALRWFlag=GF_Read,
-                                nDSXOff::Cint=0,
-                                nDSYOff::Cint=0,
-                                nPixelSpace::Cint=0,
-                                nLineSpace::Cint=0)
-    io_error = GDALRasterIO(rasterband, eRWFlag, nDSXOff, nDSYOff,
-                            _band_xsize(rasterband),
-                            _band_ysize(rasterband),
-                            Ptr{Void}(pointer(buffer)),
-                            Cint(size(buffer,1)),
-                            Cint(size(buffer,2)),
-                            _band_type(rasterband),
-                            nPixelSpace, nLineSpace)
-    io_error == CE_Failure && error("Failed to read raster band")
+                                width::Cint,
+                                height::Cint,
+                                xoffset::Cint = 0,
+                                yoffset::Cint = 0,
+                                access::GDALRWFlag = GF_Read,
+                                nPixelSpace::Cint = 0,
+                                nLineSpace::Cint = 0)
+    xsize, ysize = size(buffer)
+    io_error = GDALRasterIO(rasterband, access, xoffset, yoffset, width,
+                            height, Ptr{Void}(pointer(buffer)), xsize, ysize,
+                            _gdal_type(Val{T}), nPixelSpace, nLineSpace)
+    (io_error == CE_Failure) && error("Failed to access raster band")
     buffer
+end
+
+function _raster_io!{T <: Real}(band::GDALRasterBandH,
+                                buffer::Array{T,2},
+                                access::GDALRWFlag = GF_Read,
+                                nPixelSpace::Cint = 0,
+                                nLineSpace::Cint = 0)
+    _raster_io!(rasterband, buffer, _band_xsize(band), _band_ysize(band),
+                Cint(0), Cint(0), access, nPixelSpace, nLineSpace)
+end
+
+function _raster_io!{T <: Real}(rasterband::GDALRasterBandH,
+                                buffer::Array{T,2},
+                                rows::UnitRange{Int},
+                                cols::UnitRange{Int},
+                                access::GDALRWFlag = GF_Read,
+                                nPixelSpace::Cint = 0,
+                                nLineSpace::Cint = 0)
+    width = cols[end] - cols[1]; width < 0 && error("invalid window width")
+    height = rows[end] - rows[1]; height < 0 && error("invalid window height")
+    _raster_io!(rasterband, buffer, width, height, cols[1], rows[1], access,
+                nPixelSpace, nLineSpace)
 end
 
 @doc "Fetch the width in pixels of this band." ->
@@ -516,3 +539,37 @@ function _raster_offset(rasterband::GDALRasterBandH)
     (offset, meaningful)
 end
 
+@doc "Color Interpretation value for band"
+_get_colorinterp(band::GDALRasterBandH) =
+    GDALGetRasterColorInterpretation(band)
+
+@doc "Set color interpretation of a band." ->
+function _set_colorinterp(band::GDALRasterBandH, colorinterp::GDALColorInterp)
+    result = GDALSetRasterColorInterpretation(band, colorinterp)
+    if result == CE_Failure
+        error("$_colorinterp_name(colorinterp) is unsupported by raster.")
+    end
+end
+
+# function GDALGetRasterColorTable(arg1::GDALRasterBandH)
+#     ccall((:GDALGetRasterColorTable,libgdal),GDALColorTableH,(GDALRasterBandH,),arg1)
+# end
+
+# function GDALSetRasterColorTable(arg1::GDALRasterBandH,arg2::GDALColorTableH)
+#     ccall((:GDALSetRasterColorTable,libgdal),CPLErr,(GDALRasterBandH,GDALColorTableH),arg1,arg2)
+# end
+
+@doc """
+Returns a symbolic name for the color interpretation.
+
+This is derived from the enumerated item name with the GCI_ prefix removed, but
+there are some variations. So GCI_GrayIndex returns "Gray" and GCI_RedBand
+returns "Red". The returned strings are static strings and should not be
+modified or freed by the application.
+""" ->
+_colorinterp_name(colorinterp::GDALColorInterp) = 
+    bytestring(GDALGetColorInterpretationName(colorinterp))
+
+@doc "Get color interpretation corresponding to the given symbolic name." ->
+_colorinterp_by_name(name::ASCIIString) =
+    GDALGetColorInterpretationByName(pointer(name))
