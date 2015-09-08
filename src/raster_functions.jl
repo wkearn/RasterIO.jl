@@ -126,32 +126,3 @@ function update!{T <: Real}(raster::Raster,
     _raster_io!(_raster_band(raster.dataset, i), buffer, width, rows,
                 cols, GF_Write)
 end
-
-function update(raster::Raster, i::Int)
-    band = _raster_band(raster.dataset, i)
-    buffer = Array(dtype(band), _band_xsize(band), _band_ysize(band))
-    _raster_io!(band, buffer, GF_Write)
-end
-
-function update(raster::Raster,
-                i::Int,
-                width::Cint,
-                height::Cint,
-                xoffset::Cint,
-                yoffset::Cint)
-    band = _raster_band(raster.dataset, i)
-    buffer = Array(dtype(band), _band_xsize(band), _band_ysize(band))
-    _raster_io!(band, buffer, width, height, xoffset, yoffset, GF_Write)
-end
-
-function update(raster::Raster,
-                i::Int,
-                rows::UnitRange{Int},
-                cols::UnitRange{Int})
-    band = _raster_band(raster.dataset, i)
-    buffer = Array(dtype(band), _band_xsize(band), _band_ysize(band))
-    _raster_io!(band, buffer, rows, cols, GF_Write)
-end
-
-
-
