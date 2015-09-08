@@ -2,10 +2,10 @@
 """
 Returns a symbolic name for the color interpretation.
 
-This is derived from the enumerated item name with the GCI_ prefix removed, but
-there are some variations. So GCI_GrayIndex returns "Gray" and GCI_RedBand
-returns "Red". The returned strings are static strings and should not be
-modified or freed by the application.
+This is derived from the enumerated item name with the `GCI_` prefix removed,
+but there are some variations. So `GCI_GrayIndex` returns "Gray" and
+`GCI_RedBand` returns "Red". The returned strings are static strings and should
+not be modified or freed by the application.
 """
 _colorinterp_name(colorinterp::GDALColorInterp) = 
     bytestring(GDALGetColorInterpretationName(colorinterp))
@@ -29,9 +29,9 @@ end
 """
 Fetch the color table associated with band.
 
-If there is no associated color table, the return result is NULL. The returned
-color table remains owned by the GDALRasterBand, and can't be depended on for
-long, nor should it ever be modified by the caller.
+If there is no associated color table, the return result is `NULL`. The
+returned color table remains owned by the `GDALRasterBand`, and can't be
+depended on for long, nor should it ever be modified by the caller.
 """
 _get_raster_colortable(band::GDALRasterBandH) = GDALGetRasterColorTable(band)
 
@@ -41,20 +41,18 @@ Set the raster color table.
 The driver will make a copy of all desired data in the colortable. It remains
 owned by the caller after the call.
 
-Parameters:
-poCT    the color table to apply. This may be NULL to clear the color table
-        (where supported).
+### Parameters
+* `poCT`    the color table to apply. This may be NULL to clear the color table
+(where supported).
 
-Returns:
-CE_None on success, or CE_Failure on failure. If the action is unsupported by
-the driver, a value of CE_Failure is returned, but no error is issued.
+### Returns
+`CE_None` on success, or `CE_Failure` on failure. If the action is unsupported
+by the driver, a value of `CE_Failure` is returned, but no error is issued.
 """
 _set_raster_colortable(band::GDALRasterBandH, poCT::GDALColorTableH) =
     GDALSetRasterColorTable(band, poCT)::CPLErr
 
-"""
-Construct a new color table.
-"""
+"Construct a new color table."
 _create_colortable(eInterp::GDALPaletteInterp = GPI_RGB) =
     GDALCreateColorTable(eInterp)::GDALColorTableH
 
@@ -69,10 +67,10 @@ _clone_colortable(hTable::GDALColorTableH) =
 """
 Fetch palette interpretation.
 
-The returned value is used to interprete the values in the GDALColorEntry.
+The returned value is used to interpret the values in the `GDALColorEntry`.
 
-Returns:
-palette interpretation enumeration value, usually GPI_RGB.
+### Returns
+palette interpretation enumeration value, usually `GPI_RGB`.
 """
 _palette_interp(hTable::GDALColorTableH) =
     GDALGetPaletteInterpretation(hTable)::GDALPaletteInterp
@@ -84,14 +82,14 @@ _color_entry_count(hTable::GDALColorTableH) =
 """
 Fetch a color entry from table.
 
-Parameters:
-i   entry offset from zero to GetColorEntryCount()-1.
+### Parameters
+* `i`   entry offset from `1` to `GetColorEntryCount()`.
 
-Returns:
+### Returns
 pointer to internal color entry, or NULL if index is out of range.
 """
 _get_color_entry(htable::GDALColorTableH, i::Cint) =
-    GDALGetColorEntry(hTable, i)::Ptr{GDALColorEntry}
+    GDALGetColorEntry(hTable, i-1)::Ptr{GDALColorEntry}
 
 """
 Fetch a table entry in RGB format.
@@ -99,17 +97,17 @@ Fetch a table entry in RGB format.
 In theory this method should support translation of color palettes in non-RGB
 color spaces into RGB on the fly, but currently only works on RGB color tables.
 
-Parameters:
-i           entry offset from zero to GetColorEntryCount()-1.
-poEntry     the existing GDALColorEntry to be overrwritten with the RGB values.
+### Parameters
+* `i`           entry offset from `1` to `GetColorEntryCount()`.
+* `poEntry`     existing GDALColorEntry to be overrwritten with the RGB values.
 
-Returns:
-TRUE on success, or FALSE if the conversion isn't supported.
+### Returns
+`TRUE` on success, or `FALSE` if the conversion isn't supported.
 """
 _color_entry_rgb(hTable::GDALColorTableH,
                  i::Cint,
                  poEntry::Ptr{GDALColorEntry}) =
-    GDALGetColorEntryAsRGB(hTable, i, poEntry)::Cint
+    GDALGetColorEntryAsRGB(hTable, i-1, poEntry)::Cint
 
 """
 Set entry in color table.
@@ -120,11 +118,11 @@ the table to which it is being assigned.
 
 The table is grown as needed to hold the supplied offset.
 
-Parameters:
-i           entry offset from zero to GetColorEntryCount()-1.
-poEntry     value to assign to table.
+### Parameters
+* `i`           entry offset from `1` to `GetColorEntryCount()`.
+* `poEntry`     value to assign to table.
 """
 _set_color_entry(hTable::GDALColorTableH,
                  i::Cint,
                  poEntry::Ptr{GDALColorEntry}) =
-    GDALSetColorEntry(hTable, i, poEntry)
+    GDALSetColorEntry(hTable, i-1, poEntry)
