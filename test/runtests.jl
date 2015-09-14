@@ -40,6 +40,8 @@ A2 = RasterIO.openraster("A")
 @test A.height == A2.height
 @test RasterIO.geotransform(A) == RasterIO.geotransform(A2)
 
+RasterIO.closeraster(A2)
+
 #Remove the written raster files so as not to clutter things up
 
 for file in readdir()
