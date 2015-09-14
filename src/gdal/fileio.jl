@@ -27,29 +27,28 @@ creating a vector-only dataset for a compatible driver.
 ### Returns
 `NULL` on failure, or a new `GDALDataset`.
 """
-function _create(driver::GDALDriverH, filename::Union(ASCIIString,UTF8String),
-                 width::Int, height::Int, nband::Int, eType::GDALDataType,
-                 options::Vector{ASCIIString}=Vector{ASCIIString}())
+_create(hDriver::GDALDriverH,
+        pszFilename::Ptr{Uint8},
+        nXSize::Cint,
+        nYSize::Cint,
+        nBands::Cint,
+        eType::GDALDataType,
+        options::Ptr{Ptr{UInt8}}) =
+    GDALCreate(hDriver, pszFilename, nXSize, nYSize,
+               nBands, eType, options)::GDALDatasetH
+
+function createdataset(driver::GDALDriverH,
+                       filename::Union(ASCIIString,UTF8String),
+                       width::Int,
+                       height::Int,
+                       nband::Int,
+                       eType::GDALDataType,
+                       options::Vector{ASCIIString}=Vector{ASCIIString}())
     pfilename = pointer(filename)
-    dataset = GDALCreate(driver, pfilename, Cint(width), Cint(height),
-                         Cint(nband), eType, Ptr{Ptr{UInt8}}(pointer(options)))
-    dataset == C_NULL && error("Failed to write dataset")
+    dataset = _create(driver, pfilename, Cint(width), Cint(height),
+                      Cint(nband), eType, Ptr{Ptr{UInt8}}(pointer(options)))
+    (dataset == C_NULL) && error("Failed to create dataset")
     dataset
-end
-
-function _create(drivername::ASCIIString,
-                 filename::Union(ASCIIString,UTF8String),
-                 width::Int, height::Int, nband::Int, eType::GDALDataType,
-                 options::Vector{ASCIIString}=Vector{ASCIIString}())
-    _create(_driver_by_name(drivername), filename, width, height, nband, eType,
-            options)
-end
-
-function _create(filename::Union(ASCIIString,UTF8String),
-                 width::Int, height::Int, nband::Int, eType::GDALDataType,
-                 options::Vector{ASCIIString}=Vector{ASCIIString}())
-    _create(_identify_driver(filename), filename, width, height, nband, eType,
-            options)
 end
 
 """
@@ -96,41 +95,29 @@ avoid prior destruction of existing dataset.
 ### Returns
 a pointer to the newly created dataset (may be read-only access).
 """
+_createcopy(driver::GDALDriverH,
+            pszFilename::Ptr{Uint8},
+            poSrcDS::GDALDatasetH,
+            bStrict::Cint,
+            papszOptions::Ptr{Ptr{Uint8}},
+            pfnProgress::GDALProgressFunc,
+            pProgressData::Ptr{Void}) =
+    GDALCreateCopy(driver, pszFilename, poSrcDS, bStrict, papszOptions,
+                   pfnProgress, pProgressData)::GDALDatasetH
 
-function _create_copy(driver::GDALDriverH,
-                      filename::Union(ASCIIString,UTF8String),
-                      source::GDALDatasetH,
-                      bStrict::Cint=0,
-                      options::Vector{ASCIIString}=Vector{ASCIIString}(),
-                      pfnProgress::GDALProgressFunc=C_NULL,
-                      pProgressData::Ptr{Void}=C_NULL)
+function createcopy(driver::GDALDriverH,
+                    filename::Union(ASCIIString,UTF8String),
+                    source::GDALDatasetH,
+                    bStrict::Bool = false,
+                    options::Vector{ASCIIString} = Vector{ASCIIString}(),
+                    pfnProgress::GDALProgressFunc = C_NULL,
+                    pProgressData::Ptr{Void} = C_NULL)
     source == C_NULL && error("NULL source dataset")
-    dataset = GDALCreateCopy(driver, pointer(filename), source, bStrict,
-                             Ptr{Ptr{UInt8}}(pointer(options)),
-                             pfnProgress, pProgressData)
+    dataset = _createcopy(driver, pointer(filename), source, Cint(bStrict),
+                          Ptr{Ptr{UInt8}}(pointer(options)), pfnProgress,
+                          pProgressData)
     dataset == C_NULL && error("Failed to copy dataset")
     dataset
-end
-
-function _create_copy(drivername::ASCIIString,
-                      filename::Union(ASCIIString,UTF8String),
-                      source::GDALDatasetH,
-                      bStrict::Cint=0,
-                      options::Vector{ASCIIString}=Vector{ASCIIString}(),
-                      pfnProgress::GDALProgressFunc=C_NULL,
-                      pProgressData::Ptr{Void}=C_NULL)
-    _create_copy(_driver_by_name(drivername), filename, source, bStrict,
-                 options, pfnProgress, pProgressData)
-end
-
-function _create_copy(filename::Union(ASCIIString,UTF8String),
-                      source::GDALDatasetH,
-                      bStrict::Cint=0,
-                      options::Vector{ASCIIString}=Vector{ASCIIString}(),
-                      pfnProgress::GDALProgressFunc=C_NULL,
-                      pProgressData::Ptr{Void}=C_NULL)
-    _create_copy(_identify_driver(filename), filename, source, bStrict,
-                 options, pfnProgress, pProgressData)
 end
 
 """
@@ -170,8 +157,11 @@ drivers support only read only access.
 ### Returns
 A `GDALDatasetH` handle or `NULL` on failure.
 """
-function _open(filename::ASCIIString, access::GDALAccess=GA_ReadOnly)
-    dataset = GDALOpen(pointer(filename), access)
+_open(pszFilename::Ptr{Uint8}, eAccess::GDALAccess) =
+    GDALOpen(pszFilename, eAccess)::GDALDatasetH
+
+function opendataset(filename::ASCIIString, access::GDALAccess=GA_ReadOnly)
+    dataset = _open(pointer(filename), access)
     dataset == C_NULL && error("Could not open file \"$filename\"")
     dataset
 end
@@ -209,7 +199,7 @@ drivers support only read only access.
 ### Returns
 A `GDALDatasetH` handle or `NULL` on failure.
 """
-_open_shared(pszFilename::Ptr{Uint8}, eAccess::GDALAccess) =
+_openshared(pszFilename::Ptr{Uint8}, eAccess::GDALAccess) =
     GDALOpenShared(pszFilename, eAccess)::GDALDatasetH
 
 """
@@ -240,5 +230,7 @@ the path used to originally open the dataset. The strings will be UTF-8 encoded
 ### Returns
 `NULL` or a `NULL` terminated array of file names.
 """
-_get_filelist(dataset::GDALDatasetH) =
-    GDALGetFileList(dataset)::Ptr{Ptr{Uint8}}
+_getfilelist(dataset::GDALDatasetH) = GDALGetFileList(dataset)::Ptr{Ptr{Uint8}}
+
+getfilelist(dataset::GDALDatasetH) = loadstringlist(_getfilelist(dataset))
+

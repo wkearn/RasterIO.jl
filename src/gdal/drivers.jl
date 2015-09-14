@@ -10,7 +10,7 @@ It is possible to give an optional list of files. This is the list of all files
 at the same level in the file system as the target file, including the target
 file. The filenames will not include any path components, and are essentially
 just the output of `CPLReadDir()` on the parent directory. If the target object
-does not have filesystem semantics then the file list should be NULL.
+does not have filesystem semantics then the file list should be `NULL`.
 
 ### Parameters
 * `pszFilename`   the name of the file to access. In the case of exotic drivers
@@ -24,10 +24,14 @@ The passed value may be `NULL`.
 A `GDALDriverH` handle or `NULL` on failure. For C++ applications this handle can
 be cast to a `GDALDriver *`.
 """
-function _identify_driver(filename::ASCIIString,
-                          filelist::Vector{ASCIIString}=Vector{ASCIIString}())
-    driver = GDALIdentifyDriver(pointer(filename), pointer(filelist))
-    driver == C_NULL && error("Could not identify driver")
+_identifydriver(pszFilename::Ptr{Uint8}, papszFileList::Ptr{Ptr{Uint8}}) =
+    GDALIdentifyDriver(pszFilename, papszFileList)::GDALDriverH
+
+function identifydriver(filename::ASCIIString,
+                        filelist::Vector{ASCIIString} = Vector{ASCIIString}())
+    driver = _identifydriver(pointer(filename),
+                             Ptr{Ptr{Uint8}}(pointer(filelist)))
+    (driver == C_NULL) && error("Could not identify driver")
     driver
 end
 
@@ -36,23 +40,30 @@ Fetch a driver based on the short name (such as `GTiff`).
 
 Returns `NULL` if no match is found.
 """
-function _driver_by_name(drivername::ASCIIString)
-    driver = GDALGetDriverByName(pointer(drivername))
-    driver == C_NULL && error("Could not find driver $drivername")
+_getdriverbyname(drivername::Ptr{Uint8}) =
+    GDALGetDriverByName(drivername)::GDALDriverH
+
+function driverbyname(drivername::ASCIIString)
+    driver = _getdriverbyname(pointer(drivername))
+    (driver == C_NULL) && error("Could not find driver $drivername")
     driver
 end
 
 "Fetch the number of registered drivers."
-_driver_count() = GDALGetDriverCount()
+_getdrivercount() = GDALGetDriverCount()
+
+drivercount() = _getdrivercount()
 
 """
-Fetch driver by index (from `1` to `GetDriverCount()`).
+Fetch driver by index (from `0` to `GetDriverCount()-1`).
 
 Throws an error if the index is invalid.
 """
-function _driver_by_index(i::Int)
-    driver = GDALGetDriver(Cint(i-1))
-    driver == C_NULL || error("driver index $i is invalid")
+_getdriver(i::Cint) = GDALGetDriver(i)
+
+function driverbyindex(i::Int)
+    driver = _getdriver(Cint(i-1))
+    (driver == C_NULL) && error("driver index $i is invalid")
     driver
 end
 
@@ -62,21 +73,25 @@ Return the short name of a driver (e.g. "GTiff")
 This name can be passed to the `GDALGetDriverByName()` function.
 The returned string should not be freed and is owned by the driver.
 """
-_driver_short_name(ptr::GDALDriverH) = GDALGetDriverShortName(ptr)
-_driver_short_name(i::Int) = GDALGetDriverShortName(_driver_by_index(i))
+_getdrivershortname(ptr::GDALDriverH) = GDALGetDriverShortName(ptr)::Ptr{Uint8}
+
+drivershortname(ptr::GDALDriverH) = bytestring(_getdrivershortname(ptr))
+drivershortname(i::Int) = drivershortname(driverbyindex(i))
 
 """
 Return the long name of a driver (e.g. "GeoTIFF"), or empty string.
 
 The returned string should not be freed and is owned by the driver.
 """
-_driver_long_name(ptr::GDALDriverH) = GDALGetDriverLongName(ptr)
-_driver_long_name(i::Int) = GDALGetDriverLongName(_driver_by_index(i))
+_getdriverlongname(ptr::GDALDriverH) = GDALGetDriverLongName(ptr)
+
+driverlongname(ptr::GDALDriverH) = bytestring(_getdriverlongname(ptr))
+driverlongname(i::Int) = driverlongname(driverbyindex(i))
 
 """
 Fetch the driver that the dataset was created with `GDALOpen()`/`GDALCreate()`.
 """
-_dataset_driver(dataset::GDALDatasetH) = GDALGetDatasetDriver(dataset)
+_getdatasetdriver(dataset::GDALDatasetH) = GDALGetDatasetDriver(dataset)
 
 """
 Destroy a `GDALDriver`.
@@ -88,21 +103,21 @@ driver that is registered with the `GDALDriverManager`.
 ### Parameters
 `hDriver`     the driver to destroy.
 """
-_destroy_driver(hDriver::GDALDriverH) = GDALDestroyDriver(hDriver)
+_destroydriver(hDriver::GDALDriverH) = GDALDestroyDriver(hDriver)
 
 "Register a driver for use."
-_register_driver(driver::GDALDriverH) = GDALRegisterDriver(driver)::Cint
+_registerdriver(driver::GDALDriverH) = GDALRegisterDriver(driver)::Cint
 
 "Deregister the passed driver."
-_deregister_driver(driver::GDALDriverH) = GDALDeregisterDriver(driver)
+_deregisterdriver(driver::GDALDriverH) = GDALDeregisterDriver(driver)
 
-"""
-Destroy the driver manager. Incidently unloads all managed drivers.
+# """
+# Destroy the driver manager. Incidently unloads all managed drivers.
 
-NOTE: This function is not thread safe. It should not be called while other
-threads are actively using GDAL.
-"""
-_destroy_drivermanager() = GDALDestroyDriverManager()
+# NOTE: This function is not thread safe. It should not be called while other
+# threads are actively using GDAL.
+# """
+# _destroydrivermanager() = GDALDestroyDriverManager()
 
 """
 Return the URL to the help that describes the driver.
@@ -117,8 +132,10 @@ For the GeoTIFF driver, this is "frmt_gtiff.html"
 the URL to the help that describes the driver or `NULL`. The returned string
 should not be freed and is owned by the driver.
 """
-_driver_helptopic(driver::GDALDriverH) =
+_getdriverhelptopic(driver::GDALDriverH) =
     GDALGetDriverHelpTopic(driver)::Ptr{Uint8}
+
+driverhelptopic(driver::GDALDriverH) = bytestring(_getdriverhelptopic(driver))
 
 """
 Return the list of creation options of the driver used by `Create()` and
@@ -131,5 +148,8 @@ Return the list of creation options of the driver used by `Create()` and
 an XML string that describes the list of creation options or empty string.
 The returned string should not be freed and is owned by the driver.
 """
-_driver_creation_optionlist(driver::GDALDriverH) =
+_getdrivercreationoptionlist(driver::GDALDriverH) =
     GDALGetDriverCreationOptionList(driver)::Ptr{Uint8}
+
+drivercreationoptionlist(driver::GDALDriverH) =
+    bytestring(_getdrivercreationoptionlist(driver))

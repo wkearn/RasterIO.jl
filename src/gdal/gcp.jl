@@ -35,10 +35,10 @@ not essentially an exact fit (within 0.25 pixel) for all GCPs.
 geotransform, the pointers are ill-determined or if `bApproxOK` is `FALSE` and
 the fit is poor.
 """
-_gcp2geotransform(nGCP::Cint,
-                  pasGCPs::Ptr{GDAL_GCP},
-                  padfGeoTransform::Ptr{Cdouble},
-                  bApproxOK::Cint) =
+_gcpstogeotransform(nGCP::Cint,
+                    pasGCPs::Ptr{GDAL_GCP},
+                    padfGeoTransform::Ptr{Cdouble},
+                    bApproxOK::Cint) =
     GDALGCPsToGeoTransform(nGCP, pasGCPs, padfGeoTransform, bApproxOK)::Cint
 
 """
@@ -54,9 +54,16 @@ converts the equation from being pixel to geo to being geo to pixel.
 ### Returns
 `TRUE` on success or `FALSE` if the equation is uninvertable.
 """
-_inv_geotransform(gt_in::Ptr{Cdouble},
-                  gt_out::Ptr{Cdouble}) =
+_invgeotransform(gt_in::Ptr{Cdouble}, gt_out::Ptr{Cdouble}) =
     GDALInvGeoTransform(gt_in, gt_out)::Cint
+
+function invgeotransform!(gt_in::Vector{Cdouble}, gt_out::Vector{Cdouble})
+    result = Bool(_invgeotransform(pointer(gt_in), pointer(gt_out)))
+    result || error("Geotransform coefficients is uninvertable")
+    gt_out
+end
+
+invgeotransform(gt_in::Vector{Cdouble}) = _invgeotransform!(gt_in, Array(Cdouble, 6))
 
 """
 Apply GeoTransform to x/y coordinate.
@@ -80,12 +87,22 @@ georeferenced `(geo_x,geo_y)` location.
 * `pdfGeoY`           location for `geo_y` (northing/latitude)
 
 """
-_apply_geotransform(padfGeoTransform::Ptr{Cdouble},
-                    dfPixel::Cdouble,
-                    dfLine::Cdouble,
-                    pdfGeoX::Ptr{Cdouble},
-                    pdfGeoY::Ptr{Cdouble}) =
+_applygeotransform(padfGeoTransform::Ptr{Cdouble},
+                   dfPixel::Cdouble,
+                   dfLine::Cdouble,
+                   pdfGeoX::Ptr{Cdouble},
+                   pdfGeoY::Ptr{Cdouble}) =
     GDALApplyGeoTransform(padfGeoTransform, dfPixel, dfLine, pdfGeoX, pdfGeoY)
+
+function applygeotransform(geotransform::Vector{Cdouble},
+                           pixel::Cdouble,
+                           line::Cdouble)
+    geo_xy = Array(Cdouble, 2)
+    geo_x = pointer(geo_xy);
+    geo_y = geo_x + sizeof(Cdouble)
+    _applygeotransform(pointer(geotransform), pixel, line, geo_x, geo_y)
+    geo_xy
+end 
 
 """
 Compose two geotransforms.
@@ -100,10 +117,20 @@ being applied to a point.
 array as `padfGT1` or `padfGT2`.
 
 """
-_compose_geotransform(padfGT1::Ptr{Cdouble},
-                      padfGT2::Ptr{Cdouble},
-                      padfGTOut::Ptr{Cdouble}) =
+_composegeotransform(padfGT1::Ptr{Cdouble},
+                     padfGT2::Ptr{Cdouble},
+                     padfGTOut::Ptr{Cdouble}) =
     GDALComposeGeoTransforms(padfGT1, padfGT2, padfGTOut)
+
+function composegeotransform!(gt1::Vector{Cdouble},
+                              gt2::Vector{Cdouble},
+                              gtout::Vector{Cdouble})
+    _composegeotransform(pointer(gt1), pointer(gt2), pointer(gtout))
+    gtout
+end
+
+composegeotransform(gt1::Vector{Cdouble}, gt2::Vector{Cdouble}) =
+    composegeotransform!(gt1, gt2, Array(Cdouble, 6))
 
 """
 Fetch the affine transformation coefficients.
@@ -130,22 +157,31 @@ transformation to projection coordinates.
 ### Returns
 `CE_None` on success, or `CE_Failure` if no transform can be fetched.
 """
-function _get_geotransform!(dataset::GDALDatasetH, buffer::Vector{Cdouble})
+_getgeotransform(dataset::GDALDatasetH, buffer::Ptr{Cdouble}) =
+    GDALGetGeoTransform(dataset, buffer)::CPLErr
+
+function getgeotransform!(dataset::GDALDatasetH, buffer::Vector{Cdouble})
     @assert length(buffer) == 6
-    result = GDALGetGeoTransform(dataset, pointer(buffer))
+    result = _getgeotransform(dataset, pointer(buffer))
     (result == CE_Failure) && error("Failed to get geotransform from raster")
     buffer
 end
 
+getgeotransform(dataset::GDALDatasetH) =
+    getgeotransform!(dataset, Array(Cdouble, 6))
+
 "Set the affine transformation coefficients."
-function _set_geotransform!(dataset::GDALDatasetH, transform::Vector{Cdouble})
+_setgeotransform(dataset::GDALDatasetH, buffer::Ptr{Cdouble}) =
+    GDALSetGeoTransform(dataset, buffer)::CPLErr
+
+function setgeotransform!(dataset::GDALDatasetH, transform::Vector{Cdouble})
     @assert length(buffer) == 6
-    result = GDALSetGeoTransform(dataset, pointer(transform))
+    result = _setgeotransform(dataset, pointer(transform))
     (result == CE_Failure) && error("Failed to transform raster dataset")
 end
 
 "Get number of GCPs for this dataset. Zero if there are none."
-_gcp_count(dataset::GDALDatasetH) = GDALGetGCPCount(dataset)::Cint
+_getgcpcount(dataset::GDALDatasetH) = GDALGetGCPCount(dataset)::Cint
 
 """
 Get output projection for GCPs.
@@ -156,8 +192,11 @@ The projection string follows the normal rules from `GetProjectionRef()`.
 internal projection string or `""` if there are no GCPs. It should not be
 altered, freed or expected to last for long.
 """
-_get_gcp_projection(dataset::GDALDatasetH) =
+_getgcpprojection(dataset::GDALDatasetH) =
     GDALGetGCPProjection(dataset)::Ptr{Uint8}
+
+getgcpprojection(dataset::GDALDatasetH) =
+    bytestring(_getgcpprojection(dataset))
 
 """
 Fetch GCPs.
@@ -166,7 +205,7 @@ Fetch GCPs.
 pointer to internal GCP structure list. It should not be modified, and may
 change on the next GDAL call.
 """
-_get_gcps(dataset::GDALDatasetH) = GDALGetGCPs(dataset)::Ptr{GDAL_GCP}
+_getgcps(dataset::GDALDatasetH) = GDALGetGCPs(dataset)::Ptr{GDAL_GCP}
 
 """
 Assign GCPs.
@@ -189,10 +228,10 @@ output coordinates. Should be `""` if no output coordinate system is known.
 `CE_None` on success, `CE_Failure` on failure (including if action is not
 supported for this format).
 """
-_set_gcps(dataset::GDALDatasetH,
-          nGCPCount::Cint,
-          pasGCPList::Ptr{GDAL_GCP},
-          pszGCPProjection::Ptr{Uint8}) =
+_setgcps(dataset::GDALDatasetH,
+         nGCPCount::Cint,
+         pasGCPList::Ptr{GDAL_GCP},
+         pszGCPProjection::Ptr{Uint8}) =
     GDALSetGCPs(dataset, nGCPCount, pasGCPList, pszGCPProjection)::CPLErr
 
 """
@@ -204,10 +243,16 @@ returned.
 
 See also: http://www.gdal.org/ogr/osr_tutorial.html
 """
-_projection_ref(dataset::GDALDatasetH) = GDALGetProjectionRef(dataset)
+_getprojectionref(dataset::GDALDatasetH) =
+    GDALGetProjectionRef(dataset)::Ptr{Uint8}
+
+getprojection(dataset::GDALDatasetH) = bytestring(_getprojectionref(dataset))
 
 "Set the projection reference string for this dataset."
-function _set_projection!(dataset::GDALDatasetH, projstring::ASCIIString)
-    result = GDALSetProjection(dataset, pointer(projstring))
-    result == CE_Failure && error("Could not set projection")
+_setprojection(dataset::GDALDatasetH, projstring::Ptr{Uint8}) =
+    GDALSetProjection(dataset, projstring)::CPLErr
+
+function setprojection!(dataset::GDALDatasetH, projstring::ASCIIString)
+    result = _setprojection(dataset, pointer(projstring))
+    (result == CE_Failure) && error("Could not set projection")
 end

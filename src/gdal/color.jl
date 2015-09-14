@@ -7,22 +7,33 @@ but there are some variations. So `GCI_GrayIndex` returns "Gray" and
 `GCI_RedBand` returns "Red". The returned strings are static strings and should
 not be modified or freed by the application.
 """
-_colorinterp_name(colorinterp::GDALColorInterp) = 
-    bytestring(GDALGetColorInterpretationName(colorinterp))
+_getcolorinterpretationname(colorinterp::GDALColorInterp) = 
+    GDALGetColorInterpretationName(colorinterp)::Ptr{Uint8}
+
+colorinterpname(colorinterp::GDALColorInterp) =
+    bytestring(_getcolorinterpretationname(colorinterp))
 
 "Get color interpretation corresponding to the given symbolic name."
-_colorinterp_by_name(name::ASCIIString) =
-    GDALGetColorInterpretationByName(pointer(name))
+_getcolorinterpretationbyname(pszName::Ptr{Uint8}) =
+    GDALGetColorInterpretationByName(pszName)::GDALColorInterp
+
+colorinterp(name::ASCIIString) = _getcolorinterpretationbyname(pointer(name))
 
 "Color Interpretation value for band"
-_get_colorinterp(band::GDALRasterBandH) =
-    GDALGetRasterColorInterpretation(band)
+_getrastercolorinterpretation(band::GDALRasterBandH) =
+    GDALGetRasterColorInterpretation(band)::GDALColorInterp
+
+getcolorinterp(band::GDALRasterBandH) = _getrastercolorinterpretation(band)
 
 "Set color interpretation of a band."
-function _set_colorinterp(band::GDALRasterBandH, colorinterp::GDALColorInterp)
-    result = GDALSetRasterColorInterpretation(band, colorinterp)
+_setrastercolorinterpretation(band::GDALRasterBandH,
+                              colorinterp::GDALColorInterp) =
+    GDALSetRasterColorInterpretation(band, colorinterp)
+
+function setrastercolorinterp!(band::GDALRasterBandH, colorinterp::GDALColorInterp)
+    result = _setrastercolorinterpretation(band, colorinterp)
     if result == CE_Failure
-        error("$_colorinterp_name(colorinterp) is unsupported by raster.")
+        error("$colorinterpname(colorinterp) is unsupported by raster.")
     end
 end
 
@@ -33,7 +44,14 @@ If there is no associated color table, the return result is `NULL`. The
 returned color table remains owned by the `GDALRasterBand`, and can't be
 depended on for long, nor should it ever be modified by the caller.
 """
-_get_raster_colortable(band::GDALRasterBandH) = GDALGetRasterColorTable(band)
+_getrastercolortable(band::GDALRasterBandH) =
+    GDALGetRasterColorTable(band)::GDALColorTableH
+
+function getrastercolortable(band::GDALRasterBandH)
+    result = _getrastercolortable(band)
+    (result == C_NULL) && error("Colortable not available")
+    result
+end
 
 """
 Set the raster color table.
@@ -49,19 +67,24 @@ owned by the caller after the call.
 `CE_None` on success, or `CE_Failure` on failure. If the action is unsupported
 by the driver, a value of `CE_Failure` is returned, but no error is issued.
 """
-_set_raster_colortable(band::GDALRasterBandH, poCT::GDALColorTableH) =
+_setrastercolortable(band::GDALRasterBandH, poCT::GDALColorTableH) =
     GDALSetRasterColorTable(band, poCT)::CPLErr
 
+function setrastercolortable!(band::GDALRasterBandH, poCT::GDALColorTableH)
+    result = _setrastercolortable(band, poCT)
+    (result == CE_Failure) && error("failed to set raster colortable")
+end
+
 "Construct a new color table."
-_create_colortable(eInterp::GDALPaletteInterp = GPI_RGB) =
+_createcolortable(eInterp::GDALPaletteInterp = GPI_RGB) =
     GDALCreateColorTable(eInterp)::GDALColorTableH
 
 "Destroys a color table."
-_destroy_colortable(hTable::GDALColorTableH) =
+_destroycolortable(hTable::GDALColorTableH) =
     GDALDestroyColorTable(hTable)
 
 "Make a copy of a color table."
-_clone_colortable(hTable::GDALColorTableH) =
+_clonecolortable(hTable::GDALColorTableH) =
     GDALCloneColorTable(hTable)::GDALColorTableH
 
 """
@@ -72,24 +95,27 @@ The returned value is used to interpret the values in the `GDALColorEntry`.
 ### Returns
 palette interpretation enumeration value, usually `GPI_RGB`.
 """
-_palette_interp(hTable::GDALColorTableH) =
+_getpaletteinterpretation(hTable::GDALColorTableH) =
     GDALGetPaletteInterpretation(hTable)::GDALPaletteInterp
 
 "Get number of color entries in table."
-_color_entry_count(hTable::GDALColorTableH) =
+_getcolorentrycount(hTable::GDALColorTableH) =
     GDALGetColorEntryCount(hTable)::Cint
 
 """
 Fetch a color entry from table.
 
 ### Parameters
-* `i`   entry offset from `1` to `GetColorEntryCount()`.
+* `i`   entry offset from `0` to `GetColorEntryCount()-1`.
 
 ### Returns
 pointer to internal color entry, or NULL if index is out of range.
 """
-_get_color_entry(htable::GDALColorTableH, i::Cint) =
-    GDALGetColorEntry(hTable, i-1)::Ptr{GDALColorEntry}
+_getcolorentry(htable::GDALColorTableH, i::Cint) =
+    GDALGetColorEntry(hTable, i)::Ptr{GDALColorEntry}
+
+getcolorentry(htable::GDALColorTableH, i::Cint) =
+    _getcolorentry(hTable, i-1)
 
 """
 Fetch a table entry in RGB format.
@@ -98,16 +124,21 @@ In theory this method should support translation of color palettes in non-RGB
 color spaces into RGB on the fly, but currently only works on RGB color tables.
 
 ### Parameters
-* `i`           entry offset from `1` to `GetColorEntryCount()`.
+* `i`           entry offset from `0` to `GetColorEntryCount()-1`.
 * `poEntry`     existing GDALColorEntry to be overrwritten with the RGB values.
 
 ### Returns
 `TRUE` on success, or `FALSE` if the conversion isn't supported.
 """
-_color_entry_rgb(hTable::GDALColorTableH,
-                 i::Cint,
-                 poEntry::Ptr{GDALColorEntry}) =
-    GDALGetColorEntryAsRGB(hTable, i-1, poEntry)::Cint
+_getcolorentryasrgb(hTable::GDALColorTableH, i::Cint,
+                    poEntry::Ptr{GDALColorEntry}) =
+    GDALGetColorEntryAsRGB(hTable, i, poEntry)::Cint
+
+function getcolorentryasrgb!(hTable::GDALColorTableH, i::Cint,
+                             poEntry::Ptr{GDALColorEntry})
+    result = Bool(_getcolorentryasrgb(hTable, i-1, poEntry))
+    result || error("conversion of color entry to RGB not supported")
+end
 
 """
 Set entry in color table.
@@ -119,10 +150,13 @@ the table to which it is being assigned.
 The table is grown as needed to hold the supplied offset.
 
 ### Parameters
-* `i`           entry offset from `1` to `GetColorEntryCount()`.
+* `i`           entry offset from `0` to `GetColorEntryCount()-1`.
 * `poEntry`     value to assign to table.
 """
-_set_color_entry(hTable::GDALColorTableH,
-                 i::Cint,
-                 poEntry::Ptr{GDALColorEntry}) =
-    GDALSetColorEntry(hTable, i-1, poEntry)
+_setcolorentry(hTable::GDALColorTableH, i::Cint,
+               poEntry::Ptr{GDALColorEntry}) =
+    GDALSetColorEntry(hTable, i, poEntry)
+
+setcolorentry!(hTable::GDALColorTableH, i::Cint,
+               poEntry::Ptr{GDALColorEntry}) =
+    _setcolorentry(hTable, i-1, poEntry)
