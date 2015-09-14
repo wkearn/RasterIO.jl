@@ -15,6 +15,8 @@ function Raster(dataset::GDALDatasetH)
 end 
 
 function closeraster(raster::Raster)
-    _close(raster.dataset)
-    raster.dataset = C_NULL
+    if raster.dataset != C_NULL
+        _close(raster.dataset)
+        raster.dataset = C_NULL
+    end
 end
