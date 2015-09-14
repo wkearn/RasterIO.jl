@@ -1,5 +1,5 @@
 
-@doc "Returns a listing of all registered drivers" ->
+"Returns a listing of all registered drivers"
 function drivers()
     dlist = Dict{ASCIIString,ASCIIString}()
     for i=1:drivercount()

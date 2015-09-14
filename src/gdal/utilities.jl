@@ -1,5 +1,5 @@
 
-@doc "Load a `NULL`-terminated list of strings"
+"Load a `NULL`-terminated list of strings"
 function loadstringlist(pstringlist::Ptr{Ptr{Uint8}})
     stringlist = Vector{ASCIIString}()
     (pstringlist == C_NULL) && return stringlist
