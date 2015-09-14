@@ -1,5 +1,4 @@
 # GDAL Data Model
-
 This is a brief summary from http://www.gdal.org/gdal_datamodel.html
 
 ## Dataset
@@ -117,3 +116,8 @@ A band may have ≥0 overviews. Each is represented as a "free standing"
 GDALRasterBand. The size (in pixels and lines) of the overview will be
 different than the underlying raster, but the geographic region covered by
 overviews is the same as the full resolution band.
+
+## GDAL Major Objects
+Taken from http://www.gdal.org/classGDALMajorObject.html
+
+![majorobj](classGDALMajorObject.png)
