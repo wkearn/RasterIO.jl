@@ -3,17 +3,13 @@ type Raster
     width::Cint
     height::Cint
     nband::Cint # number of raster bands
-    geotransform::Vector{Cdouble} # affine transform to geo coordinates
-    projection::ASCIIString # OpenGIS Well Known Text (WKT) string
 end
 
 function Raster(dataset::GDALDatasetH)
     raster = Raster(dataset,
-                    _raster_xsize(dataset), # width
-                    _raster_ysize(dataset), # height
-                    _raster_count(dataset), # number of bands
-                    _get_geotransform!(dataset, Array(Cdouble,6)),
-                    bytestring(_projection_ref(dataset)))
+                    _getrasterxsize(dataset), # width
+                    _getrasterysize(dataset), # height
+                    _getrastercount(dataset)) # number of bands
     finalizer(raster, closeraster)
     raster
 end 

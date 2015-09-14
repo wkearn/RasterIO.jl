@@ -1,31 +1,19 @@
-# Raster Drivers
-driver_shortname(ptr::GDALDriverH) = bytestring(_driver_short_name(ptr))
-driver_shortname(i::Int) = bytestring(_driver_short_name(i))
-driver_longname(ptr::GDALDriverH) = bytestring(_driver_long_name(ptr))
-driver_longname(i::Int) = bytestring(_driver_long_name(i))
 
 @doc "Returns a listing of all registered drivers" ->
 function drivers()
     dlist = Dict{ASCIIString,ASCIIString}()
-    for i=1:_driver_count()
-        dlist[driver_shortname(i)] = driver_longname(i)
+    for i=1:drivercount()
+        dlist[drivershortname(i)] = driverlongname(i)
     end
     dlist
 end
 
-# Utilities
-wktstring(raster::Raster) = bytestring(_projection_ref(raster.dataset))
-driver(raster::Raster) = _driver_short_name(_dataset_driver(raster.dataset))
-dtype(rasterband::GDALRasterBandH) = _jl_type(Val{_band_type(rasterband)})
-
-# function gdal_translate(source::ASCIIString,destination::ASCIIString,dstdriver::ASCIIString)
-#     raster = open_raster(source,Int(GA_ReadOnly))
-#     write_raster(raster,destination,dstdriver,eval(parse(string("GDT_",eltype(raster.data)))))
-# end
+geotransform(raster::Raster) = getgeotransform(raster.dataset)
+wktprojection(raster::Raster) = getprojection(raster.dataset)
 
 # Raster I/O
 openraster(filename::ASCIIString, access::GDALAccess=GA_ReadOnly) =
-    Raster(_open(filename, access))
+    Raster(opendataset(filename, access))
 
 function createraster(filename::Union(ASCIIString,UTF8String),
                       width::Int,
@@ -34,16 +22,17 @@ function createraster(filename::Union(ASCIIString,UTF8String),
                       dtype::DataType,
                       drivername::ASCIIString,
                       options::Vector{ASCIIString} = Vector{ASCIIString}())
-    Raster(_create(drivername, filename, width, height, nbands,
-                   _gdal_type(dtype), options))
-end 
+    Raster(createdataset(driverbyname(drivername), filename, width, height,
+                         nbands, _gdaltype(dtype), options))
+end
 
 function writeraster(raster::Raster,
                      filename::Union(ASCIIString,UTF8String),
                      strict::Bool = false,
                      options::Vector{ASCIIString} = Vector{ASCIIString}())
-    _close(_create_copy(_dataset_driver(raster.dataset), filename,
-                        raster.dataset, Cint(strict), options))
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    _close(createcopy(_getdatasetdriver(raster.dataset), filename,
+                      raster.dataset, strict, options))
 end
 
 function writeraster(raster::Raster,
@@ -51,78 +40,201 @@ function writeraster(raster::Raster,
                      drivername::ASCIIString,
                      strict::Bool = false,
                      options::Vector{ASCIIString} = Vector{ASCIIString}())
-    _close(_create_copy(_driver_by_name(drivername), filename,
-                        raster.dataset, Cint(strict), options))
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    _close(createcopy(driverbyname(drivername), filename, raster.dataset,
+                      strict, options))
 end
 
-fetch!{T <: Real}(raster::Raster, buffer::Array{T,2}, i::Int) =
-    _raster_io!(_raster_band(raster.dataset, i), buffer, GF_Read)
+function fetch!{T <: Real}(raster::Raster, buffer::Array{T,2}, i::Cint)
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    rasterio!(_getrasterband(raster.dataset, i), buffer, GF_Read)
+end
+
+function fetch!{T <: Real}(raster::Raster,
+                           buffer::Array{T,3},
+                           indices::Vector{Cint})
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    rasterio!(raster.dataset, buffer, indices, GF_Read)
+end
+
+function fetch!{T <: Real}(raster::Raster, buffer::Array{T,3})
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    @assert size(buffer, 3) == raster.nband
+    rasterio!(raster.dataset, buffer,
+              collect(Cint(1):Cint(raster.nband)),
+              GF_Read)
+end
 
 function fetch!{T <: Real}(raster::Raster,
                            buffer::Array{T,2},
-                           i::Int,
+                           i::Cint,
                            width::Cint,
                            height::Cint,
                            xoffset::Cint,
                            yoffset::Cint)
-    _raster_io!(_raster_band(raster.dataset, i), buffer, width, height,
-                xoffset, yoffset, GF_Read)
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    rasterio!(_getrasterband(raster.dataset, i), buffer,
+              width, height, xoffset, yoffset, GF_Read)
+end
+
+function fetch!{T <: Real}(raster::Raster,
+                           buffer::Array{T,3},
+                           indices::Vector{Cint},
+                           width::Cint,
+                           height::Cint,
+                           xoffset::Cint,
+                           yoffset::Cint)
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    rasterio!(raster.dataset, buffer, indices, width, height,
+              xoffset, yoffset, GF_Read)
 end
 
 function fetch!{T <: Real}(raster::Raster,
                            buffer::Array{T,2},
-                           i::Int,
-                           rows::UnitRange{Int},
-                           cols::UnitRange{Int})
-    _raster_io!(_raster_band(raster.dataset, i), buffer, width, rows,
-                cols, GF_Read)
+                           i::Cint,
+                           rows::UnitRange{Cint},
+                           cols::UnitRange{Cint})
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    rasterio!(_getrasterband(raster.dataset, i), buffer,
+              width, rows, cols, GF_Read)
 end
 
-function fetch(raster::Raster, i::Int)
-    band = _raster_band(raster.dataset, i)
-    buffer = Array(dtype(band), _band_xsize(band), _band_ysize(band))
-    _raster_io!(band, buffer, GF_Read)
+function fetch!{T <: Real}(raster::Raster,
+                           buffer::Array{T,3},
+                           indices::Vector{Cint},
+                           rows::UnitRange{Cint},
+                           cols::UnitRange{Cint})
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    rasterio!(raster.dataset, buffer, indices, rows, cols, GF_Read)
+end
+
+function fetch(raster::Raster, i::Cint)
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    band = _getrasterband(raster.dataset, i)
+    buffer = Array(dtype(band), _getrasterbandxsize(band),
+                   _getrasterbandysize(band))
+    rasterio!(band, buffer, GF_Read)
+end
+
+function fetch(raster::Raster, indices::Vector{Cint})
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    buffer = Array(dtype(_getrasterband(raster.dataset, indices[1])),
+                   _getrasterxsize(raster.dataset),
+                   _getrasterysize(raster.dataset),
+                   length(indices))
+    rasterio!(raster.dataset, buffer, indices, GF_Read)
+end
+
+function fetch(raster::Raster)
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    buffer = Array(dtype(_getrasterband(raster.dataset, Cint(1))),
+                   _getrasterxsize(raster.dataset),
+                   _getrasterysize(raster.dataset),
+                   _getrastercount(raster.dataset))
+    fetch!(raster, buffer)
 end
 
 function fetch(raster::Raster,
-               i::Int,
+               i::Cint,
                width::Cint,
                height::Cint,
                xoffset::Cint,
                yoffset::Cint)
-    band = _raster_band(raster.dataset, i)
-    buffer = Array(dtype(band), _band_xsize(band), _band_ysize(band))
-    _raster_io!(band, buffer, width, height, xoffset, yoffset, GF_Read)
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    band = _getrasterband(raster.dataset, i)
+    buffer = Array(dtype(band), _getrasterbandxsize(band),
+                   _getrasterbandysize(band))
+    rasterio!(band, buffer, width, height, xoffset, yoffset, GF_Read)
 end
 
 function fetch(raster::Raster,
-               i::Int,
-               rows::UnitRange{Int},
-               cols::UnitRange{Int})
-    band = _raster_band(raster.dataset, i)
-    buffer = Array(dtype(band), _band_xsize(band), _band_ysize(band))
-    _raster_io!(band, buffer, rows, cols, GF_Read)
+               indices::Vector{Cint},
+               width::Cint,
+               height::Cint,
+               xoffset::Cint,
+               yoffset::Cint)
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    buffer = Array(dtype(_getrasterband(raster.dataset, indices[1])),
+                   _getrasterxsize(raster.dataset),
+                   _getrasterysize(raster.dataset),
+                   length(indices))
+    rasterio!(raster.dataset, buffer, indices, width, height, xoffset, yoffset,
+              GF_Read)
 end
 
-update!{T <: Real}(raster::Raster, buffer::Array{T,2}, i::Int) =
-    _raster_io!(_raster_band(raster.dataset, i), buffer, GF_Write)
+function fetch(raster::Raster,
+               i::Cint,
+               rows::UnitRange{Cint},
+               cols::UnitRange{Cint})
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    band = _getrasterband(raster.dataset, i)
+    buffer = Array(dtype(band), _getrasterbandxsize(band),
+                   _getrasterbandysize(band))
+    rasterio!(band, buffer, rows, cols, GF_Read)
+end
+
+function fetch(raster::Raster,
+               indices::Vector{Cint},
+               rows::UnitRange{Cint},
+               cols::UnitRange{Cint})
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    buffer = Array(dtype(_getrasterband(raster.dataset, indices[1])),
+                   _getrasterxsize(raster.dataset),
+                   _getrasterysize(raster.dataset),
+                   length(indices))
+    rasterio!(raster.dataset, buffer, indices, rows, cols, GF_Read)
+end
+
+function update!{T <: Real}(raster::Raster, buffer::Array{T,2}, i::Cint)
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    rasterio!(_getrasterband(raster.dataset, i), buffer, GF_Write)
+end
+
+function update!{T <: Real}(raster::Raster,
+                            buffer::Array{T,3},
+                            indices::Vector{Cint})
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    rasterio!(raster.dataset, buffer, indices, GF_Write)
+end
 
 function update!{T <: Real}(raster::Raster,
                             buffer::Array{T,2},
-                            i::Int,
+                            i::Cint,
                             width::Cint,
                             height::Cint,
                             xoffset::Cint,
                             yoffset::Cint)
-    _raster_io!(_raster_band(raster.dataset, i), buffer, width, height,
-                xoffset, yoffset, GF_Write)
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    rasterio!(_getrasterband(raster.dataset, i), buffer, width, height,
+              xoffset, yoffset, GF_Write)
+end
+
+function update!{T <: Real}(raster::Raster,
+                            buffer::Array{T,3},
+                            indices::Cint,
+                            width::Cint,
+                            height::Cint,
+                            xoffset::Cint,
+                            yoffset::Cint)
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    rasterio!(raster.dataset, buffer, indices, width, height,
+              xoffset, yoffset, GF_Write)
 end
 
 function update!{T <: Real}(raster::Raster,
                             buffer::Array{T,2},
-                            i::Int,
-                            rows::UnitRange{Int},
-                            cols::UnitRange{Int})
-    _raster_io!(_raster_band(raster.dataset, i), buffer, width, rows,
-                cols, GF_Write)
+                            i::Cint,
+                            rows::UnitRange{Cint},
+                            cols::UnitRange{Cint})
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    rasterio!(_getrasterband(raster.dataset, i), buffer, rows, cols, GF_Write)
+end
+
+function update!{T <: Real}(raster::Raster,
+                            buffer::Array{T,3},
+                            indices::Vector{Cint},
+                            rows::UnitRange{Cint},
+                            cols::UnitRange{Cint})
+    raster.dataset == C_NULL && error("Can't read closed raster file")
+    rasterio!(raster.dataset, buffer, indices, rows, cols, GF_Write)
 end
