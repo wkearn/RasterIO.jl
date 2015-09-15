@@ -1,7 +1,5 @@
 # Automatically generated using Clang.jl wrap_c, version 0.0.0
 
-using Compat
-
 const GDAL_VERSION_MAJOR = 1
 const GDAL_VERSION_MINOR = 11
 const GDAL_VERSION_REV = 2
