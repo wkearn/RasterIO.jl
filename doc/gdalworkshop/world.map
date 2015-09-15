@@ -1,0 +1,65 @@
+MAP
+  NAME WORLD
+  STATUS ON
+  EXTENT -180 -90 180 90
+  UNITS METERS
+  SHAPEPATH "/usr/local/share/data/natural_earth2/"
+  IMAGECOLOR 255 255 255
+
+  PROJECTION
+    "init=epsg:4326"
+  END
+
+  WEB
+
+    # change the next two lines to match your setup
+    IMAGEPATH "/usr/local/www/docs_maps/tmp/"
+    IMAGEURL "/tmp/"
+
+    METADATA
+      WFS_TITLE "Natural Earth demo"
+      WFS_ABSTRACT "Natural Earth demo"
+      WFS_ACCESSCONSTRAINTS "none"
+      OWS_ENABLE_REQUEST "*"
+
+      # change this value to match your setup
+      WFS_ONLINERESOURCE "http://localhost/cgi-bin/mapserv?MAP=/tmp/world.map"
+
+      WFS_SRS "EPSG:4326"
+
+      WFS_MAXFEATURES "300"
+    END
+  END
+
+  LAYER
+    NAME ne_10m_admin_0_countries
+    TYPE POLYGON
+    STATUS DEFAULT
+    DATA ne_10m_admin_0_countries
+
+    METADATA
+      WFS_TITLE "ne_10m_admin_0_countries"
+      WFS_ABSTRACT "ne_10m_admin_0_countries"
+      WFS_SRS "EPSG:4326"
+      gml_include_items "all"
+      GML_TYPES "AUTO"
+    END
+  END
+
+  LAYER
+    NAME ne_10m_admin_1_states_provinces_shp
+    TYPE POLYGON
+    STATUS DEFAULT
+    DATA ne_10m_admin_1_states_provinces_shp
+
+    METADATA
+      WFS_TITLE "ne_10m_admin_1_states_provinces_shp"
+      WFS_ABSTRACT "ne_10m_admin_1_states_provinces_shp"
+      WFS_SRS "EPSG:4326"
+      gml_include_items "all"
+      wfs_featureid "diss_me"
+      GML_TYPES "AUTO"
+    END
+  END
+
+END # Map File
