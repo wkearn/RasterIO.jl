@@ -23,7 +23,6 @@ _getblocksize(hBand::GDALRasterBandH, pnXSize::Ptr{Cint}, pnYSize::Ptr{Cint}) =
 function getblocksize(rasterband::GDALRasterBandH)
     xy = Array(Cint, 2); x = pointer(xy); y = x + sizeof(Cint)
     _getblocksize(rasterband, x, y)
-    (x == C_NULL || y == C_NULL) && error("Failed to get block size")
     xy
 end
 
