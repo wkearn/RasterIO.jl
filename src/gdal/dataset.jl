@@ -270,15 +270,15 @@ function rasterio!{T <: Real}(hDS::GDALDatasetH,
               nPixelSpace, nLineSpace, nBandSpace)
 end
 
-function rasterio!{T <: Real}(hDS::GDALDatasetH,
-                              buffer::Array{T, 3},
-                              bands::Vector{Cint},
-                              rows::UnitRange{Cint},
-                              cols::UnitRange{Cint},
-                              access::GDALRWFlag = GF_Read,
-                              nPixelSpace::Integer = Cint(0),
-                              nLineSpace::Integer = Cint(0),
-                              nBandSpace::Integer = Cint(0))
+function rasterio!{T <: Real, U <: Integer}(hDS::GDALDatasetH,
+                                            buffer::Array{T, 3},
+                                            bands::Vector{Cint},
+                                            rows::UnitRange{U},
+                                            cols::UnitRange{U},
+                                            access::GDALRWFlag = GF_Read,
+                                            nPixelSpace::Integer = Cint(0),
+                                            nLineSpace::Integer = Cint(0),
+                                            nBandSpace::Integer = Cint(0))
     width = cols[end] - cols[1] + Cint(1)
     width < 0 && error("invalid window width")
     height = rows[end] - rows[1] + Cint(1)
