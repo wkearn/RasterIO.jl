@@ -39,14 +39,14 @@ _create(hDriver::GDALDriverH,
 
 function createdataset(driver::GDALDriverH,
                        filename::Union(ASCIIString,UTF8String),
-                       width::Int,
-                       height::Int,
-                       nband::Int,
+                       width::Integer,
+                       height::Integer,
+                       nband::Integer,
                        eType::GDALDataType,
                        options::Vector{ASCIIString}=Vector{ASCIIString}())
     pfilename = pointer(filename)
-    dataset = _create(driver, pfilename, Cint(width), Cint(height),
-                      Cint(nband), eType, Ptr{Ptr{UInt8}}(pointer(options)))
+    dataset = _create(driver, pfilename, width, height, nband, eType,
+                      Ptr{Ptr{UInt8}}(pointer(options)))
     (dataset == C_NULL) && error("Failed to create dataset")
     dataset
 end
@@ -113,7 +113,7 @@ function createcopy(driver::GDALDriverH,
                     pfnProgress::GDALProgressFunc = C_NULL,
                     pProgressData::Ptr{Void} = C_NULL)
     source == C_NULL && error("NULL source dataset")
-    dataset = _createcopy(driver, pointer(filename), source, Cint(bStrict),
+    dataset = _createcopy(driver, pointer(filename), source, bStrict,
                           Ptr{Ptr{UInt8}}(pointer(options)), pfnProgress,
                           pProgressData)
     dataset == C_NULL && error("Failed to copy dataset")

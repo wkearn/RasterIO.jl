@@ -125,9 +125,11 @@ function fetch(raster::Raster, indices::Vector{Cint})
     rasterio!(raster.dataset, buffer, indices, GF_Read)
 end
 
+fetch(raster::Raster, indices::Vector{Int}) = fetch(raster, map(Cint, indices))
+
 function fetch(raster::Raster)
     raster.dataset == C_NULL && error("Can't read closed raster file")
-    buffer = Array(dtype(_getrasterband(raster.dataset, Cint(1))),
+    buffer = Array(dtype(_getrasterband(raster.dataset, 1)),
                    _getrasterxsize(raster.dataset),
                    _getrasterysize(raster.dataset),
                    _getrastercount(raster.dataset))
@@ -162,6 +164,10 @@ function fetch(raster::Raster,
               GF_Read)
 end
 
+fetch(raster::Raster, indices::Vector{Int}, width::Integer, height::Integer,
+      xoffset::Integer, yoffset::Integer) =
+    fetch(raster, map(Cint,indices), width, height, xoffset, yoffset)
+
 function fetch{U <: Integer}(raster::Raster,
                              i::Integer,
                              rows::UnitRange{U},
@@ -185,6 +191,10 @@ function fetch{U <: Integer}(raster::Raster,
     rasterio!(raster.dataset, buffer, indices, rows, cols, GF_Read)
 end
 
+fetch{U <: Integer}(raster::Raster, indices::Vector{Int},
+                    rows::UnitRange{U}, cols::UnitRange{U}) =
+    fetch(raster, map(Cint,indices), rows, cols)
+
 function update!{T <: Real}(raster::Raster, buffer::Array{T,2}, i::Integer)
     raster.dataset == C_NULL && error("Can't read closed raster file")
     rasterio!(_getrasterband(raster.dataset, i), buffer, GF_Write)
@@ -196,6 +206,9 @@ function update!{T <: Real}(raster::Raster,
     raster.dataset == C_NULL && error("Can't read closed raster file")
     rasterio!(raster.dataset, buffer, indices, GF_Write)
 end
+
+update!{T <: Real}(raster::Raster, buffer::Array{T,3}, indices::Vector{Int}) =
+    update!(raster, buffer, map(Cint, indices))
 
 function update!{T <: Real}(raster::Raster,
                             buffer::Array{T,2},
@@ -211,7 +224,7 @@ end
 
 function update!{T <: Real}(raster::Raster,
                             buffer::Array{T,3},
-                            indices::Integer,
+                            indices::Vector{Cint},
                             width::Integer,
                             height::Integer,
                             xoffset::Integer,
@@ -220,6 +233,11 @@ function update!{T <: Real}(raster::Raster,
     rasterio!(raster.dataset, buffer, indices, width, height,
               xoffset, yoffset, GF_Write)
 end
+
+update!{T <: Real}(raster::Raster, buffer::Array{T,3}, indices::Vector{Int},
+                   width::Integer, height::Integer, xoffset::Integer,
+                   yoffset::Integer) =
+    update!(raster, buffer, map(Cint,indices), width, height, xoffset, yoffset)
 
 function update!{T <: Real, U <: Integer}(raster::Raster,
                                           buffer::Array{T,2},
@@ -238,3 +256,8 @@ function update!{T <: Real, U <: Integer}(raster::Raster,
     raster.dataset == C_NULL && error("Can't read closed raster file")
     rasterio!(raster.dataset, buffer, indices, rows, cols, GF_Write)
 end
+
+update!{T <: Real, U <: Integer}(raster::Raster, buffer::Array{T,3},
+                                 indices::Vector{Int}, rows::UnitRange{U},
+                                 cols::UnitRange{U}) =
+    update!(raster, buffer, map(Cint, indices), rows, cols)

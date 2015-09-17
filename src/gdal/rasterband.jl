@@ -106,15 +106,15 @@ function rasterio!{T <: Real}(rasterband::GDALRasterBandH,
                               buffer::Array{T,2},
                               width::Integer,
                               height::Integer,
-                              xoffset::Integer = Cint(0),
-                              yoffset::Integer = Cint(0),
+                              xoffset::Integer = 0,
+                              yoffset::Integer = 0,
                               access::GDALRWFlag = GF_Read,
-                              nPixelSpace::Integer = Cint(0),
-                              nLineSpace::Integer = Cint(0))
+                              nPixelSpace::Integer = 0,
+                              nLineSpace::Integer = 0)
     xsize, ysize = size(buffer)
     io_error = _rasterio(rasterband, access, xoffset, yoffset, width,
-                         height, Ptr{Void}(pointer(buffer)), Cint(xsize),
-                         Cint(ysize), _gdaltype(T), nPixelSpace, nLineSpace)
+                         height, Ptr{Void}(pointer(buffer)), xsize,
+                         ysize, _gdaltype(T), nPixelSpace, nLineSpace)
     (io_error == CE_Failure) && error("Failed to access raster band")
     buffer
 end
@@ -122,10 +122,10 @@ end
 function rasterio!{T <: Real}(rasterband::GDALRasterBandH,
                               buffer::Array{T,2},
                               access::GDALRWFlag = GF_Read,
-                              nPixelSpace::Integer = Cint(0),
-                              nLineSpace::Integer = Cint(0))
+                              nPixelSpace::Integer = 0,
+                              nLineSpace::Integer = 0)
     rasterio!(rasterband, buffer, _getrasterbandxsize(rasterband),
-              _getrasterbandysize(rasterband), Cint(0), Cint(0), access,
+              _getrasterbandysize(rasterband), 0, 0, access,
               nPixelSpace, nLineSpace)
 end
 
@@ -134,11 +134,11 @@ function rasterio!{T <: Real, U <: Integer}(rasterband::GDALRasterBandH,
                                             rows::UnitRange{U},
                                             cols::UnitRange{U},
                                             access::GDALRWFlag = GF_Read,
-                                            nPixelSpace::Integer = Cint(0),
-                                            nLineSpace::Integer = Cint(0))
-    width = cols[end] - cols[1] + Cint(1)
+                                            nPixelSpace::Integer = 0,
+                                            nLineSpace::Integer = 0)
+    width = cols[end] - cols[1] + 1
     width < 0 && error("invalid window width")
-    height = rows[end] - rows[1] + Cint(1)
+    height = rows[end] - rows[1] + 1
     height < 0 && error("invalid window height")
     rasterio!(rasterband, buffer, width, height, cols[1], rows[1], access,
               nPixelSpace, nLineSpace)
@@ -308,7 +308,7 @@ function rasterbandcopywholeraster(hSrcBand::GDALRasterBandH,
                                    options::Vector{ASCIIString})
     result = _rasterbandcopywholeraster(hSrcBand, hDstBand,
                                         Ptr{Ptr{Uint8}}(pointer(options)),
-                                        Ptr{Void}(C_NULL), Ptr{Void}(C_NULL))
+                                        C_NULL, C_NULL)
     (result == CE_Failure) && error("Failed to copy raster band")
 end
 
@@ -316,7 +316,7 @@ function rasterbandcopywholeraster(hSrcBand::GDALRasterBandH,
                                    hDstBand::GDALRasterBandH)
     result = _rasterbandcopywholeraster(hSrcBand, hDstBand,
                                         Ptr{Ptr{Uint8}}(C_NULL),
-                                        Ptr{Void}(C_NULL), Ptr{Void}(C_NULL))
+                                        C_NULL, C_NULL)
     (result == CE_Failure) && error("Failed to copy raster band")
 end
 
@@ -457,7 +457,7 @@ overview GDALRasterBand.
 _getoverview(band::GDALRasterBandH, i::Integer) =
     GDALGetOverview(band, i)::GDALRasterBandH
 
-getoverview(band::GDALRasterBandH, i::Int) = _getoverview(band, Cint(i-1))
+getoverview(band::GDALRasterBandH, i::Int) = _getoverview(band, i-1)
 
 """
 Fetch best sampling overview.
