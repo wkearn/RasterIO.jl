@@ -1,12 +1,12 @@
-# function GDALInitGCPs(arg1::Cint,arg2::Ptr{GDAL_GCP})
+# function GDALInitGCPs(arg1::Integer,arg2::Ptr{GDAL_GCP})
 #     ccall((:GDALInitGCPs,libgdal),Void,(Cint,Ptr{GDAL_GCP}),arg1,arg2)
 # end
 
-# function GDALDeinitGCPs(arg1::Cint,arg2::Ptr{GDAL_GCP})
+# function GDALDeinitGCPs(arg1::Integer,arg2::Ptr{GDAL_GCP})
 #     ccall((:GDALDeinitGCPs,libgdal),Void,(Cint,Ptr{GDAL_GCP}),arg1,arg2)
 # end
 
-# function GDALDuplicateGCPs(arg1::Cint,arg2::Ptr{GDAL_GCP})
+# function GDALDuplicateGCPs(arg1::Integer,arg2::Ptr{GDAL_GCP})
 #     ccall((:GDALDuplicateGCPs,libgdal),Ptr{GDAL_GCP},(Cint,Ptr{GDAL_GCP}),
 #           arg1,arg2)
 # end
@@ -35,10 +35,10 @@ not essentially an exact fit (within 0.25 pixel) for all GCPs.
 geotransform, the pointers are ill-determined or if `bApproxOK` is `FALSE` and
 the fit is poor.
 """
-_gcpstogeotransform(nGCP::Cint,
+_gcpstogeotransform(nGCP::Integer,
                     pasGCPs::Ptr{GDAL_GCP},
                     padfGeoTransform::Ptr{Cdouble},
-                    bApproxOK::Cint) =
+                    bApproxOK::Integer) =
     GDALGCPsToGeoTransform(nGCP, pasGCPs, padfGeoTransform, bApproxOK)::Cint
 
 """
@@ -229,7 +229,7 @@ output coordinates. Should be `""` if no output coordinate system is known.
 supported for this format).
 """
 _setgcps(dataset::GDALDatasetH,
-         nGCPCount::Cint,
+         nGCPCount::Integer,
          pasGCPList::Ptr{GDAL_GCP},
          pszGCPProjection::Ptr{Uint8}) =
     GDALSetGCPs(dataset, nGCPCount, pasGCPList, pszGCPProjection)::CPLErr

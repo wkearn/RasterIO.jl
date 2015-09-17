@@ -29,9 +29,9 @@ creating a vector-only dataset for a compatible driver.
 """
 _create(hDriver::GDALDriverH,
         pszFilename::Ptr{Uint8},
-        nXSize::Cint,
-        nYSize::Cint,
-        nBands::Cint,
+        nXSize::Integer,
+        nYSize::Integer,
+        nBands::Integer,
         eType::GDALDataType,
         options::Ptr{Ptr{UInt8}}) =
     GDALCreate(hDriver, pszFilename, nXSize, nYSize,
@@ -98,7 +98,7 @@ a pointer to the newly created dataset (may be read-only access).
 _createcopy(driver::GDALDriverH,
             pszFilename::Ptr{Uint8},
             poSrcDS::GDALDatasetH,
-            bStrict::Cint,
+            bStrict::Integer,
             papszOptions::Ptr{Ptr{Uint8}},
             pfnProgress::GDALProgressFunc,
             pProgressData::Ptr{Void}) =

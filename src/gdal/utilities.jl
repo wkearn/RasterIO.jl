@@ -216,12 +216,12 @@ failure mentionning the name of the calling component.
 `TRUE` if GDAL library version at runtime matches nVersionMajor.nVersionMinor,
 `FALSE` otherwise.
 """
-_checkversion(major::Cint, minor::Cint, name::Ptr{Uint8}=Ptr{Uint8}(C_NULL)) =
+_checkversion(major::Integer, minor::Integer, name::Ptr{Uint8}=Ptr{Uint8}(C_NULL)) =
     GDALCheckVersion(major, minor, name)::Cint
 
-checkversion(major::Cint, minor::Cint) = Bool(_checkversion(major, minor))
+checkversion(major::Integer, minor::Integer) = Bool(_checkversion(major, minor))
 
-checkversion(major::Cint, minor::Cint, name::ASCIIString) =
+checkversion(major::Integer, minor::Integer, name::ASCIIString) =
     Bool(_checkversion(major, minor, pointer(name)))
 
 """
@@ -236,7 +236,7 @@ The maximum value is 2GB, due to the use of a signed 32 bit integer. Use
 ### Parameters
 `nbytes`     the maximum number of bytes for caching.
 """
-_setcachemax(nbytes::Cint) = GDALSetCacheMax(nbytes)
+_setcachemax(nbytes::Integer) = GDALSetCacheMax(nbytes)
 
 """
 Get maximum cache memory.

@@ -59,7 +59,7 @@ Fetch driver by index (from `0` to `GetDriverCount()-1`).
 
 Throws an error if the index is invalid.
 """
-_getdriver(i::Cint) = GDALGetDriver(i)
+_getdriver(i::Integer) = GDALGetDriver(i)
 
 function driverbyindex(i::Int)
     driver = _getdriver(Cint(i-1))
