@@ -29,9 +29,9 @@ creating a vector-only dataset for a compatible driver.
 """
 _create(hDriver::GDALDriverH,
         pszFilename::Ptr{Uint8},
-        nXSize::Cint,
-        nYSize::Cint,
-        nBands::Cint,
+        nXSize::Integer,
+        nYSize::Integer,
+        nBands::Integer,
         eType::GDALDataType,
         options::Ptr{Ptr{UInt8}}) =
     GDALCreate(hDriver, pszFilename, nXSize, nYSize,
@@ -39,14 +39,14 @@ _create(hDriver::GDALDriverH,
 
 function createdataset(driver::GDALDriverH,
                        filename::Union(ASCIIString,UTF8String),
-                       width::Int,
-                       height::Int,
-                       nband::Int,
+                       width::Integer,
+                       height::Integer,
+                       nband::Integer,
                        eType::GDALDataType,
                        options::Vector{ASCIIString}=Vector{ASCIIString}())
     pfilename = pointer(filename)
-    dataset = _create(driver, pfilename, Cint(width), Cint(height),
-                      Cint(nband), eType, Ptr{Ptr{UInt8}}(pointer(options)))
+    dataset = _create(driver, pfilename, width, height, nband, eType,
+                      Ptr{Ptr{UInt8}}(pointer(options)))
     (dataset == C_NULL) && error("Failed to create dataset")
     dataset
 end
@@ -98,7 +98,7 @@ a pointer to the newly created dataset (may be read-only access).
 _createcopy(driver::GDALDriverH,
             pszFilename::Ptr{Uint8},
             poSrcDS::GDALDatasetH,
-            bStrict::Cint,
+            bStrict::Integer,
             papszOptions::Ptr{Ptr{Uint8}},
             pfnProgress::GDALProgressFunc,
             pProgressData::Ptr{Void}) =
@@ -113,7 +113,7 @@ function createcopy(driver::GDALDriverH,
                     pfnProgress::GDALProgressFunc = C_NULL,
                     pProgressData::Ptr{Void} = C_NULL)
     source == C_NULL && error("NULL source dataset")
-    dataset = _createcopy(driver, pointer(filename), source, Cint(bStrict),
+    dataset = _createcopy(driver, pointer(filename), source, bStrict,
                           Ptr{Ptr{UInt8}}(pointer(options)), pfnProgress,
                           pProgressData)
     dataset == C_NULL && error("Failed to copy dataset")

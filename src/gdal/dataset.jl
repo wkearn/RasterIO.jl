@@ -121,11 +121,11 @@ _getrastercount(dataset::GDALDatasetH) = GDALGetRasterCount(dataset)::Cint
 """
 Fetch a band object for a dataset from its index (from 1 to `GetRasterCount()`)
 """
-_getrasterband(dataset::GDALDatasetH, i::Cint) =
+_getrasterband(dataset::GDALDatasetH, i::Integer) =
   GDALGetRasterBand(dataset, i)::GDALRasterBandH
 
 getrasterband(dataset::GDALDatasetH, i::Int) =
-  _getrasterband(dataset, Cint(i))
+  _getrasterband(dataset, i)
 
 """
 Add a band to a dataset.
@@ -218,19 +218,19 @@ option can also be defined to override the default resampling to one of
 """
 _datasetrasterio(hDS::GDALDatasetH,
                  eRWFlag::GDALRWFlag,
-                 nDSXOff::Cint,
-                 nDSYOff::Cint,
-                 nDSXSize::Cint,
-                 nDSYSize::Cint,
+                 nDSXOff::Integer,
+                 nDSYOff::Integer,
+                 nDSXSize::Integer,
+                 nDSYSize::Integer,
                  pData::Ptr{Void},
-                 nBXSize::Cint,
-                 nBYSize::Cint,
+                 nBXSize::Integer,
+                 nBYSize::Integer,
                  eBDataType::GDALDataType,
-                 nBandCount::Cint,
+                 nBandCount::Integer,
                  panBandCount::Ptr{Cint},
-                 nPixelSpace::Cint = Cint(0),
-                 nLineSpace::Cint = Cint(0),
-                 nBandSpace::Cint = Cint(0)) =
+                 nPixelSpace::Integer = 0,
+                 nLineSpace::Integer = 0,
+                 nBandSpace::Integer = 0) =
     GDALDatasetRasterIO(hDS, eRWFlag, nDSXOff, nDSYOff, nDSXSize, nDSYSize,
                         pData, nBXSize, nBYSize, eBDataType, nBandCount,
                         panBandCount, nPixelSpace, nLineSpace,
@@ -239,16 +239,16 @@ _datasetrasterio(hDS::GDALDatasetH,
 function rasterio!{T <: Real}(hDS::GDALDatasetH,
                               buffer::Array{T, 3},
                               bands::Vector{Cint},
-                              width::Cint,
-                              height::Cint,
-                              xoffset::Cint = Cint(0),
-                              yoffset::Cint = Cint(0),
+                              width::Integer,
+                              height::Integer,
+                              xoffset::Integer = 0,
+                              yoffset::Integer = 0,
                               access::GDALRWFlag = GF_Read,
-                              nPixelSpace::Cint = Cint(0),
-                              nLineSpace::Cint = Cint(0),
-                              nBandSpace::Cint = Cint(0))
-    xsize, ysize, zsize = map(Cint,size(buffer))
-    nband = Cint(length(bands))
+                              nPixelSpace::Integer = 0,
+                              nLineSpace::Integer = 0,
+                              nBandSpace::Integer = 0)
+    xsize, ysize, zsize = size(buffer)
+    nband = length(bands)
     @assert nband == zsize
     result = _datasetrasterio(hDS, access, xoffset, yoffset, width, height,
                               Ptr{Void}(pointer(buffer)), xsize, ysize,
@@ -262,26 +262,25 @@ function rasterio!{T <: Real}(hDS::GDALDatasetH,
                               buffer::Array{T, 3},
                               bands::Vector{Cint},
                               access::GDALRWFlag = GF_Read,
-                              nPixelSpace::Cint = Cint(0),
-                              nLineSpace::Cint = Cint(0),
-                              nBandSpace::Cint = Cint(0))
-    rasterio!(hDS, buffer, bands, _getrasterxsize(hDS),
-              _getrasterysize(hDS), Cint(0), Cint(0), access,
-              nPixelSpace, nLineSpace, nBandSpace)
+                              nPixelSpace::Integer = 0,
+                              nLineSpace::Integer = 0,
+                              nBandSpace::Integer = 0)
+    rasterio!(hDS, buffer, bands, _getrasterxsize(hDS), _getrasterysize(hDS),
+              0, 0, access, nPixelSpace, nLineSpace, nBandSpace)
 end
 
-function rasterio!{T <: Real}(hDS::GDALDatasetH,
-                              buffer::Array{T, 3},
-                              bands::Vector{Cint},
-                              rows::UnitRange{Cint},
-                              cols::UnitRange{Cint},
-                              access::GDALRWFlag = GF_Read,
-                              nPixelSpace::Cint = Cint(0),
-                              nLineSpace::Cint = Cint(0),
-                              nBandSpace::Cint = Cint(0))
-    width = cols[end] - cols[1] + Cint(1)
+function rasterio!{T <: Real, U <: Integer}(hDS::GDALDatasetH,
+                                            buffer::Array{T, 3},
+                                            bands::Vector{Cint},
+                                            rows::UnitRange{U},
+                                            cols::UnitRange{U},
+                                            access::GDALRWFlag = GF_Read,
+                                            nPixelSpace::Integer = 0,
+                                            nLineSpace::Integer = 0,
+                                            nBandSpace::Integer = 0)
+    width = cols[end] - cols[1] + 1
     width < 0 && error("invalid window width")
-    height = rows[end] - rows[1] + Cint(1)
+    height = rows[end] - rows[1] + 1
     height < 0 && error("invalid window height")
     rasterio!(hDS, buffer, bands, width, height, cols[1], rows[1], access,
               nPixelSpace, nLineSpace, nBandSpace)
@@ -344,9 +343,9 @@ call could be made:
 """
 _buildoverviews(arg1::GDALDatasetH,
                 pszResampling::Ptr{Uint8},
-                nOverviews::Cint,
+                nOverviews::Integer,
                 panOverviewList::Ptr{Cint},
-                nListBands::Cint,
+                nListBands::Integer,
                 panBandList::Ptr{Cint},
                 pfnProgress::GDALProgressFunc,
                 pProgressData::Ptr{Void}) =
@@ -358,9 +357,9 @@ function buildoverviews(hDS::GDALDatasetH,
                         overviewlist::Vector{Cint},
                         bandList::Vector{Cint})
     result = _buildoverviews(hDS, pointer(resampling),
-                             Cint(length(overviewlist)),
+                             length(overviewlist),
                              pointer(overviewlist),
-                             Cint(length(bandlist)),
+                             length(bandlist),
                              pointer(bandlist),
                              C_NULL, C_NULL)
     (result == CE_Failure) && error("Failed to build overviews")
@@ -425,7 +424,7 @@ See also: http://trac.osgeo.org/gdal/wiki/rfc15_nodatabitmask
 `CE_None` on success or `CE_Failure` on an error.
 """
 _createdatasetmaskband(hDS::GDALDatasetH,
-                       nFlags::Cint = Cint(GMF_PER_DATASET)) =
+                       nFlags::Integer = GMF_PER_DATASET) =
     GDALCreateDatasetMaskBand(hDS, nFlags)::CPLErr
 
 function createdatasetmaskband(hDS::GDALDatasetH)

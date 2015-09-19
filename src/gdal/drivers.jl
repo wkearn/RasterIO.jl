@@ -59,10 +59,10 @@ Fetch driver by index (from `0` to `GetDriverCount()-1`).
 
 Throws an error if the index is invalid.
 """
-_getdriver(i::Cint) = GDALGetDriver(i)
+_getdriver(i::Integer) = GDALGetDriver(i)
 
-function driverbyindex(i::Int)
-    driver = _getdriver(Cint(i-1))
+function driverbyindex(i::Integer)
+    driver = _getdriver(i-1)
     (driver == C_NULL) && error("driver index $i is invalid")
     driver
 end
@@ -76,7 +76,7 @@ The returned string should not be freed and is owned by the driver.
 _getdrivershortname(ptr::GDALDriverH) = GDALGetDriverShortName(ptr)::Ptr{Uint8}
 
 drivershortname(ptr::GDALDriverH) = bytestring(_getdrivershortname(ptr))
-drivershortname(i::Int) = drivershortname(driverbyindex(i))
+drivershortname(i::Integer) = drivershortname(driverbyindex(i))
 
 """
 Return the long name of a driver (e.g. "GeoTIFF"), or empty string.
@@ -86,7 +86,7 @@ The returned string should not be freed and is owned by the driver.
 _getdriverlongname(ptr::GDALDriverH) = GDALGetDriverLongName(ptr)
 
 driverlongname(ptr::GDALDriverH) = bytestring(_getdriverlongname(ptr))
-driverlongname(i::Int) = driverlongname(driverbyindex(i))
+driverlongname(i::Integer) = driverlongname(driverbyindex(i))
 
 """
 Fetch the driver that the dataset was created with `GDALOpen()`/`GDALCreate()`.
