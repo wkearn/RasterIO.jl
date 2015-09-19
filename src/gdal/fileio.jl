@@ -38,7 +38,7 @@ _create(hDriver::GDALDriverH,
                nBands, eType, options)::GDALDatasetH
 
 function createdataset(driver::GDALDriverH,
-                       filename::Union(ASCIIString,UTF8String),
+                       filename::Union{ASCIIString,UTF8String},
                        width::Integer,
                        height::Integer,
                        nband::Integer,
@@ -106,7 +106,7 @@ _createcopy(driver::GDALDriverH,
                    pfnProgress, pProgressData)::GDALDatasetH
 
 function createcopy(driver::GDALDriverH,
-                    filename::Union(ASCIIString,UTF8String),
+                    filename::Union{ASCIIString,UTF8String},
                     source::GDALDatasetH,
                     bStrict::Bool = false,
                     options::Vector{ASCIIString} = Vector{ASCIIString}(),
@@ -233,4 +233,3 @@ the path used to originally open the dataset. The strings will be UTF-8 encoded
 _getfilelist(dataset::GDALDatasetH) = GDALGetFileList(dataset)::Ptr{Ptr{UInt8}}
 
 getfilelist(dataset::GDALDatasetH) = loadstringlist(_getfilelist(dataset))
-

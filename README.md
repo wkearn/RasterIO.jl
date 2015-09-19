@@ -33,7 +33,7 @@ Opens the specified raster file using GDAL and returns a Raster. Access is 0 for
 
 Writes the specified raster object to the destination file using the given driver. Uses the `GDALCreateCopy()` method.
 
-	createraster(filename::Union(ASCIIString,UTF8String),
+	createraster(filename::Union{ASCIIString,UTF8String},
                  width::Int,
                  height::Int,
                  nbands::Int,

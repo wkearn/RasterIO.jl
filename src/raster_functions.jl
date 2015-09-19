@@ -15,7 +15,7 @@ wktprojection(raster::Raster) = getprojection(raster.dataset)
 openraster(filename::ASCIIString, access::GDALAccess=GA_ReadOnly) =
     Raster(opendataset(filename, access))
 
-function createraster(filename::Union(ASCIIString,UTF8String),
+function createraster(filename::Union{ASCIIString,UTF8String},
                       width::Int,
                       height::Int,
                       nbands::Int,
@@ -27,7 +27,7 @@ function createraster(filename::Union(ASCIIString,UTF8String),
 end
 
 function writeraster(raster::Raster,
-                     filename::Union(ASCIIString,UTF8String),
+                     filename::Union{ASCIIString,UTF8String},
                      strict::Bool = false,
                      options::Vector{ASCIIString} = Vector{ASCIIString}())
     raster.dataset == C_NULL && error("Can't read closed raster file")
@@ -36,7 +36,7 @@ function writeraster(raster::Raster,
 end
 
 function writeraster(raster::Raster,
-                     filename::Union(ASCIIString,UTF8String),
+                     filename::Union{ASCIIString,UTF8String},
                      drivername::ASCIIString,
                      strict::Bool = false,
                      options::Vector{ASCIIString} = Vector{ASCIIString}())
