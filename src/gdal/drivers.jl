@@ -24,13 +24,13 @@ The passed value may be `NULL`.
 A `GDALDriverH` handle or `NULL` on failure. For C++ applications this handle can
 be cast to a `GDALDriver *`.
 """
-_identifydriver(pszFilename::Ptr{Uint8}, papszFileList::Ptr{Ptr{Uint8}}) =
+_identifydriver(pszFilename::Ptr{UInt8}, papszFileList::Ptr{Ptr{UInt8}}) =
     GDALIdentifyDriver(pszFilename, papszFileList)::GDALDriverH
 
 function identifydriver(filename::ASCIIString,
                         filelist::Vector{ASCIIString} = Vector{ASCIIString}())
     driver = _identifydriver(pointer(filename),
-                             Ptr{Ptr{Uint8}}(pointer(filelist)))
+                             Ptr{Ptr{UInt8}}(pointer(filelist)))
     (driver == C_NULL) && error("Could not identify driver")
     driver
 end
@@ -40,7 +40,7 @@ Fetch a driver based on the short name (such as `GTiff`).
 
 Returns `NULL` if no match is found.
 """
-_getdriverbyname(drivername::Ptr{Uint8}) =
+_getdriverbyname(drivername::Ptr{UInt8}) =
     GDALGetDriverByName(drivername)::GDALDriverH
 
 function driverbyname(drivername::ASCIIString)
@@ -73,7 +73,7 @@ Return the short name of a driver (e.g. "GTiff")
 This name can be passed to the `GDALGetDriverByName()` function.
 The returned string should not be freed and is owned by the driver.
 """
-_getdrivershortname(ptr::GDALDriverH) = GDALGetDriverShortName(ptr)::Ptr{Uint8}
+_getdrivershortname(ptr::GDALDriverH) = GDALGetDriverShortName(ptr)::Ptr{UInt8}
 
 drivershortname(ptr::GDALDriverH) = bytestring(_getdrivershortname(ptr))
 drivershortname(i::Integer) = drivershortname(driverbyindex(i))
@@ -133,7 +133,7 @@ the URL to the help that describes the driver or `NULL`. The returned string
 should not be freed and is owned by the driver.
 """
 _getdriverhelptopic(driver::GDALDriverH) =
-    GDALGetDriverHelpTopic(driver)::Ptr{Uint8}
+    GDALGetDriverHelpTopic(driver)::Ptr{UInt8}
 
 driverhelptopic(driver::GDALDriverH) = bytestring(_getdriverhelptopic(driver))
 
@@ -149,7 +149,7 @@ an XML string that describes the list of creation options or empty string.
 The returned string should not be freed and is owned by the driver.
 """
 _getdrivercreationoptionlist(driver::GDALDriverH) =
-    GDALGetDriverCreationOptionList(driver)::Ptr{Uint8}
+    GDALGetDriverCreationOptionList(driver)::Ptr{UInt8}
 
 drivercreationoptionlist(driver::GDALDriverH) =
     bytestring(_getdrivercreationoptionlist(driver))

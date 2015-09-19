@@ -35,7 +35,7 @@ const GMF_NODATA = 0x08
 # Skipping MacroDefinition: GDAL_CHECK_VERSION ( pszCallingComponentName ) GDALCheckVersion ( GDAL_VERSION_MAJOR , GDAL_VERSION_MINOR , pszCallingComponentName )
 
 # begin enum GDALDataType
-typealias GDALDataType Uint32
+typealias GDALDataType UInt32
 const GDT_Unknown = (UInt32)(0)
 const GDT_Byte = (UInt32)(1)
 const GDT_UInt16 = (UInt32)(2)
@@ -52,7 +52,7 @@ const GDT_TypeCount = (UInt32)(12)
 # end enum GDALDataType
 
 # begin enum GDALAsyncStatusType
-typealias GDALAsyncStatusType Uint32
+typealias GDALAsyncStatusType UInt32
 const GARIO_PENDING = (UInt32)(0)
 const GARIO_UPDATE = (UInt32)(1)
 const GARIO_ERROR = (UInt32)(2)
@@ -61,19 +61,19 @@ const GARIO_TypeCount = (UInt32)(4)
 # end enum GDALAsyncStatusType
 
 # begin enum GDALAccess
-typealias GDALAccess Uint32
+typealias GDALAccess UInt32
 const GA_ReadOnly = (UInt32)(0)
 const GA_Update = (UInt32)(1)
 # end enum GDALAccess
 
 # begin enum GDALRWFlag
-typealias GDALRWFlag Uint32
+typealias GDALRWFlag UInt32
 const GF_Read = (UInt32)(0)
 const GF_Write = (UInt32)(1)
 # end enum GDALRWFlag
 
 # begin enum GDALColorInterp
-typealias GDALColorInterp Uint32
+typealias GDALColorInterp UInt32
 const GCI_Undefined = (UInt32)(0)
 const GCI_GrayIndex = (UInt32)(1)
 const GCI_PaletteIndex = (UInt32)(2)
@@ -95,7 +95,7 @@ const GCI_Max = (UInt32)(16)
 # end enum GDALColorInterp
 
 # begin enum GDALPaletteInterp
-typealias GDALPaletteInterp Uint32
+typealias GDALPaletteInterp UInt32
 const GPI_Gray = (UInt32)(0)
 const GPI_RGB = (UInt32)(1)
 const GPI_CMYK = (UInt32)(2)
@@ -112,15 +112,15 @@ typealias GDALRasterAttributeTableH Ptr{Void}
 typealias GDALAsyncReaderH Ptr{Void}
 
 type GDALOptionDefinition
-    pszOptionName::Ptr{Uint8}
-    pszValueType::Ptr{Uint8}
-    pszDescription::Ptr{Uint8}
-    papszOptions::Ptr{Ptr{Uint8}}
+    pszOptionName::Ptr{UInt8}
+    pszValueType::Ptr{UInt8}
+    pszDescription::Ptr{UInt8}
+    papszOptions::Ptr{Ptr{UInt8}}
 end
 
 type GDAL_GCP
-    pszId::Ptr{Uint8}
-    pszInfo::Ptr{Uint8}
+    pszId::Ptr{UInt8}
+    pszInfo::Ptr{UInt8}
     dfGCPPixel::Cdouble
     dfGCPLine::Cdouble
     dfGCPX::Cdouble
@@ -186,14 +186,14 @@ type GDALColorEntry
 end
 
 # begin enum GDALRATFieldType
-typealias GDALRATFieldType Uint32
+typealias GDALRATFieldType UInt32
 const GFT_Integer = (UInt32)(0)
 const GFT_Real = (UInt32)(1)
 const GFT_String = (UInt32)(2)
 # end enum GDALRATFieldType
 
 # begin enum GDALRATFieldUsage
-typealias GDALRATFieldUsage Uint32
+typealias GDALRATFieldUsage UInt32
 const GFU_Generic = (UInt32)(0)
 const GFU_PixelCount = (UInt32)(1)
 const GFU_Name = (UInt32)(2)
@@ -216,7 +216,7 @@ const GFU_MaxCount = (UInt32)(18)
 # end enum GDALRATFieldUsage
 
 # begin enum GDALTileOrganization
-typealias GDALTileOrganization Uint32
+typealias GDALTileOrganization UInt32
 const GTO_TIP = (UInt32)(0)
 const GTO_BIT = (UInt32)(1)
 const GTO_BSQ = (UInt32)(2)
@@ -224,20 +224,20 @@ const GTO_BSQ = (UInt32)(2)
 
 typealias GDALTransformerFunc Ptr{Void}
 
-immutable Array_4_Uint8
-    d1::Uint8
-    d2::Uint8
-    d3::Uint8
-    d4::Uint8
+immutable Array_4_UInt8
+    d1::UInt8
+    d2::UInt8
+    d3::UInt8
+    d4::UInt8
 end
 
-zero(::Type{Array_4_Uint8}) = begin  # /Users/fgans/.julia/v0.4/Clang/src/wrap_c.jl, line 264:
-        Array_4_Uint8(fill(zero(Uint8),4)...)
+zero(::Type{Array_4_UInt8}) = begin  # /Users/fgans/.julia/v0.4/Clang/src/wrap_c.jl, line 264:
+        Array_4_UInt8(fill(zero(UInt8),4)...)
     end
 
 type GDALTransformerInfo
-    szSignature::Array_4_Uint8
-    pszClassName::Ptr{Uint8}
+    szSignature::Array_4_UInt8
+    pszClassName::Ptr{UInt8}
     pfnTransform::GDALTransformerFunc
     pfnCleanup::Ptr{Void}
     pfnSerialize::Ptr{Void}
@@ -268,7 +268,7 @@ type OGRContourWriterInfo
 end
 
 # begin enum GDALGridAlgorithm
-typealias GDALGridAlgorithm Uint32
+typealias GDALGridAlgorithm UInt32
 const GGA_InverseDistanceToAPower = (UInt32)(1)
 const GGA_MovingAverage = (UInt32)(2)
 const GGA_NearestNeighbor = (UInt32)(3)
@@ -357,8 +357,8 @@ type GDALRasterBandPamInfo
     dfNoDataValue::Cdouble
     poColorTable::Ptr{Cint}
     eColorInterp::GDALColorInterp
-    pszUnitType::Ptr{Uint8}
-    papszCategoryNames::Ptr{Ptr{Uint8}}
+    pszUnitType::Ptr{UInt8}
+    papszCategoryNames::Ptr{Ptr{UInt8}}
     dfOffset::Cdouble
     dfScale::Cdouble
     bHaveMinMax::Cint
@@ -374,14 +374,14 @@ end
 const MAX_ULPS = 10
 
 # begin enum GDALBurnValueSrc
-typealias GDALBurnValueSrc Uint32
+typealias GDALBurnValueSrc UInt32
 const GBV_UserBurnValue = (UInt32)(0)
 const GBV_Z = (UInt32)(1)
 const GBV_M = (UInt32)(2)
 # end enum GDALBurnValueSrc
 
 # begin enum GDALRasterMergeAlg
-typealias GDALRasterMergeAlg Uint32
+typealias GDALRasterMergeAlg UInt32
 const GRMA_Replace = (UInt32)(0)
 const GRMA_Add = (UInt32)(1)
 # end enum GDALRasterMergeAlg
@@ -433,21 +433,21 @@ const MAXSTRINGLENGTH = 65535
 
 type gpsname
     tag::Cint
-    name::Ptr{Uint8}
+    name::Ptr{UInt8}
 end
 
 type tagname
     tag::Cint
-    name::Ptr{Uint8}
+    name::Ptr{UInt8}
 end
 
 type intr_tag
     tag::Cint
-    name::Ptr{Uint8}
+    name::Ptr{UInt8}
 end
 
 # begin enum TIFFDataType
-typealias TIFFDataType Uint32
+typealias TIFFDataType UInt32
 const TIFF_NOTYPE = (UInt32)(0)
 const TIFF_BYTE = (UInt32)(1)
 const TIFF_ASCII = (UInt32)(2)
@@ -499,7 +499,7 @@ end
 typealias GDALJP2GeoTIFFBox Void
 
 # begin enum GDALResampleAlg
-typealias GDALResampleAlg Uint32
+typealias GDALResampleAlg UInt32
 const GRA_NearestNeighbour = (UInt32)(0)
 const GRA_Bilinear = (UInt32)(1)
 const GRA_Cubic = (UInt32)(2)
@@ -514,7 +514,7 @@ typealias GDALProgressFunc Ptr{Void}
 typealias GDALTransformerFunc Ptr{Void}
 
 type GDALWarpOptions
-    papszWarpOptions::Ptr{Ptr{Uint8}}
+    papszWarpOptions::Ptr{Ptr{UInt8}}
     dfWarpMemoryLimit::Cdouble
     eResampleAlg::GDALResampleAlg
     eWorkingDataType::GDALDataType

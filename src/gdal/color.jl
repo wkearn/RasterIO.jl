@@ -8,13 +8,13 @@ but there are some variations. So `GCI_GrayIndex` returns "Gray" and
 not be modified or freed by the application.
 """
 _getcolorinterpretationname(colorinterp::GDALColorInterp) = 
-    GDALGetColorInterpretationName(colorinterp)::Ptr{Uint8}
+    GDALGetColorInterpretationName(colorinterp)::Ptr{UInt8}
 
 colorinterpname(colorinterp::GDALColorInterp) =
     bytestring(_getcolorinterpretationname(colorinterp))
 
 "Get color interpretation corresponding to the given symbolic name."
-_getcolorinterpretationbyname(pszName::Ptr{Uint8}) =
+_getcolorinterpretationbyname(pszName::Ptr{UInt8}) =
     GDALGetColorInterpretationByName(pszName)::GDALColorInterp
 
 colorinterp(name::ASCIIString) = _getcolorinterpretationbyname(pointer(name))

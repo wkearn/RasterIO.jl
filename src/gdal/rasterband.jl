@@ -184,13 +184,13 @@ modified, nor freed by the calling application.
 unit name string.
 """
 _getrasterunittype(hBand::GDALRasterBandH) =
-    GDALGetRasterUnitType(hBand)::Ptr{Uint8}
+    GDALGetRasterUnitType(hBand)::Ptr{UInt8}
 
 getrasterunittype(hBand::GDALRasterBandH) =
     bytestring(_getrasterunittype(hBand))
 
 "Set unit type."
-_setrasterunittype(hBand::GDALRasterBandH, newvalue::Ptr{Uint8}) =
+_setrasterunittype(hBand::GDALRasterBandH, newvalue::Ptr{UInt8}) =
     GDALSetRasterUnitType(hBand, newvalue)::CPLErr
 
 function setrasterunittype!(hBand::GDALRasterBandH, newvalue::ASCIIString)
@@ -297,7 +297,7 @@ More options may be supported in the future.
 """
 _rasterbandcopywholeraster(hSrcBand::GDALRasterBandH,
                            hDstBand::GDALRasterBandH,
-                           papszOptions::Ptr{Ptr{Uint8}},
+                           papszOptions::Ptr{Ptr{UInt8}},
                            pfnProgress::GDALProgressFunc,
                            pProgressData::Ptr{Void}) =
     GDALRasterBandCopyWholeRaster(hSrcBand, hDstBand, papszOptions,
@@ -307,7 +307,7 @@ function rasterbandcopywholeraster(hSrcBand::GDALRasterBandH,
                                    hDstBand::GDALRasterBandH,
                                    options::Vector{ASCIIString})
     result = _rasterbandcopywholeraster(hSrcBand, hDstBand,
-                                        Ptr{Ptr{Uint8}}(pointer(options)),
+                                        Ptr{Ptr{UInt8}}(pointer(options)),
                                         C_NULL, C_NULL)
     (result == CE_Failure) && error("Failed to copy raster band")
 end
@@ -315,7 +315,7 @@ end
 function rasterbandcopywholeraster(hSrcBand::GDALRasterBandH,
                                    hDstBand::GDALRasterBandH)
     result = _rasterbandcopywholeraster(hSrcBand, hDstBand,
-                                        Ptr{Ptr{Uint8}}(C_NULL),
+                                        Ptr{Ptr{UInt8}}(C_NULL),
                                         C_NULL, C_NULL)
     (result == CE_Failure) && error("Failed to copy raster band")
 end
@@ -349,7 +349,7 @@ per band.
 _regenerateoverviews(hSrcBand::GDALRasterBandH,
                      nOverviewCount::Integer,
                      pahOvrBands::Ptr{GDALRasterBandH},
-                     pszResampling::Ptr{Uint8},
+                     pszResampling::Ptr{UInt8},
                      pfnProgress::GDALProgressFunc,
                      pProgressData::Ptr{Void}) =
     GDALRegenerateOverviews(hSrcBand, nOverviewCount, pahOverviewBands,
@@ -364,7 +364,7 @@ _rasteradviseread(hRB::GDALRasterBandH,
                   nBXSize::Integer,
                   nBYSize::Integer,
                   eBDataType::GDALDataType,
-                  papszOptions::Ptr{Ptr{Uint8}}) =
+                  papszOptions::Ptr{Ptr{UInt8}}) =
     GDALRasterAdviseRead(hRB, nDSXOff, nDSYOff, nDSXSize, nDSYSize, nBXSize,
                          nBYSize, eBDataType, papszOptions)::CPLErr
 
@@ -515,10 +515,10 @@ period of time.
 list of names, or `NULL` if none.
 """
 _getrastercategorynames(band::GDALRasterBandH) =
-    GDALGetRasterCategoryNames(band)::Ptr{Ptr{Uint8}}
+    GDALGetRasterCategoryNames(band)::Ptr{Ptr{UInt8}}
 
 "Set the category names for this band."
-_setrastercategorynames(band::GDALRasterBandH, names::Ptr{Ptr{Uint8}}) =
+_setrastercategorynames(band::GDALRasterBandH, names::Ptr{Ptr{UInt8}}) =
     GDALSetRasterCategoryNames(band, names)::CPLErr
 
 """

@@ -193,7 +193,7 @@ internal projection string or `""` if there are no GCPs. It should not be
 altered, freed or expected to last for long.
 """
 _getgcpprojection(dataset::GDALDatasetH) =
-    GDALGetGCPProjection(dataset)::Ptr{Uint8}
+    GDALGetGCPProjection(dataset)::Ptr{UInt8}
 
 getgcpprojection(dataset::GDALDatasetH) =
     bytestring(_getgcpprojection(dataset))
@@ -231,7 +231,7 @@ supported for this format).
 _setgcps(dataset::GDALDatasetH,
          nGCPCount::Integer,
          pasGCPList::Ptr{GDAL_GCP},
-         pszGCPProjection::Ptr{Uint8}) =
+         pszGCPProjection::Ptr{UInt8}) =
     GDALSetGCPs(dataset, nGCPCount, pasGCPList, pszGCPProjection)::CPLErr
 
 """
@@ -244,12 +244,12 @@ returned.
 See also: http://www.gdal.org/ogr/osr_tutorial.html
 """
 _getprojectionref(dataset::GDALDatasetH) =
-    GDALGetProjectionRef(dataset)::Ptr{Uint8}
+    GDALGetProjectionRef(dataset)::Ptr{UInt8}
 
 getprojection(dataset::GDALDatasetH) = bytestring(_getprojectionref(dataset))
 
 "Set the projection reference string for this dataset."
-_setprojection(dataset::GDALDatasetH, projstring::Ptr{Uint8}) =
+_setprojection(dataset::GDALDatasetH, projstring::Ptr{UInt8}) =
     GDALSetProjection(dataset, projstring)::CPLErr
 
 function setprojection!(dataset::GDALDatasetH, projstring::ASCIIString)

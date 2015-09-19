@@ -28,7 +28,7 @@ creating a vector-only dataset for a compatible driver.
 `NULL` on failure, or a new `GDALDataset`.
 """
 _create(hDriver::GDALDriverH,
-        pszFilename::Ptr{Uint8},
+        pszFilename::Ptr{UInt8},
         nXSize::Integer,
         nYSize::Integer,
         nBands::Integer,
@@ -96,10 +96,10 @@ avoid prior destruction of existing dataset.
 a pointer to the newly created dataset (may be read-only access).
 """
 _createcopy(driver::GDALDriverH,
-            pszFilename::Ptr{Uint8},
+            pszFilename::Ptr{UInt8},
             poSrcDS::GDALDatasetH,
             bStrict::Integer,
-            papszOptions::Ptr{Ptr{Uint8}},
+            papszOptions::Ptr{Ptr{UInt8}},
             pfnProgress::GDALProgressFunc,
             pProgressData::Ptr{Void}) =
     GDALCreateCopy(driver, pszFilename, poSrcDS, bStrict, papszOptions,
@@ -157,7 +157,7 @@ drivers support only read only access.
 ### Returns
 A `GDALDatasetH` handle or `NULL` on failure.
 """
-_open(pszFilename::Ptr{Uint8}, eAccess::GDALAccess) =
+_open(pszFilename::Ptr{UInt8}, eAccess::GDALAccess) =
     GDALOpen(pszFilename, eAccess)::GDALDatasetH
 
 function opendataset(filename::ASCIIString, access::GDALAccess=GA_ReadOnly)
@@ -199,7 +199,7 @@ drivers support only read only access.
 ### Returns
 A `GDALDatasetH` handle or `NULL` on failure.
 """
-_openshared(pszFilename::Ptr{Uint8}, eAccess::GDALAccess) =
+_openshared(pszFilename::Ptr{UInt8}, eAccess::GDALAccess) =
     GDALOpenShared(pszFilename, eAccess)::GDALDatasetH
 
 """
@@ -230,7 +230,7 @@ the path used to originally open the dataset. The strings will be UTF-8 encoded
 ### Returns
 `NULL` or a `NULL` terminated array of file names.
 """
-_getfilelist(dataset::GDALDatasetH) = GDALGetFileList(dataset)::Ptr{Ptr{Uint8}}
+_getfilelist(dataset::GDALDatasetH) = GDALGetFileList(dataset)::Ptr{Ptr{UInt8}}
 
 getfilelist(dataset::GDALDatasetH) = loadstringlist(_getfilelist(dataset))
 

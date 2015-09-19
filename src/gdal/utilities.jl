@@ -1,6 +1,6 @@
 
 "Load a `NULL`-terminated list of strings"
-function loadstringlist(pstringlist::Ptr{Ptr{Uint8}})
+function loadstringlist(pstringlist::Ptr{Ptr{UInt8}})
     stringlist = Vector{ASCIIString}()
     (pstringlist == C_NULL) && return stringlist
     i = 1
@@ -22,7 +22,7 @@ Fetch list of (non-empty) metadata domains. (Since: GDAL 1.11)
 `NULL` or a string list. Must be freed with `CSLDestroy()`
 """
 _getmetadatadomainlist(obj::GDALMajorObjectH) =
-    GDALGetMetadataDomainList(obj)::Ptr{Ptr{Uint8}}
+    GDALGetMetadataDomainList(obj)::Ptr{Ptr{UInt8}}
 
 getmetadatadomainlist(obj::GDALMajorObjectH) =
     loadstringlist(_getmetadatadomainlist(obj))
@@ -42,8 +42,8 @@ Note that relatively few formats return any metadata at this time.
 ### Returns
 `NULL` or a string list.
 """
-_getmetadata(obj::GDALMajorObjectH, domain::Ptr{Uint8}) =
-    GDALGetMetadata(obj, domain)::Ptr{Ptr{Uint8}}
+_getmetadata(obj::GDALMajorObjectH, domain::Ptr{UInt8}) =
+    GDALGetMetadata(obj, domain)::Ptr{Ptr{UInt8}}
 
 getmetadata(obj::GDALMajorObjectH, domain::ASCIIString = "") =
     loadstringlist(_getmetadata(obj, pointer(domain)))
@@ -61,15 +61,15 @@ has been accepted, but is likely not maintained persistently by the underlying
 object between sessions.
 """
 _setmetadata(obj::GDALMajorObjectH,
-             metadata::Ptr{Ptr{Uint8}},
-             domain::Ptr{Uint8}) =
+             metadata::Ptr{Ptr{UInt8}},
+             domain::Ptr{UInt8}) =
     GDALSetMetadata(obj, metadata, domain)::CPLErr
 
 function setmetadata!(obj::GDALMajorObjectH,
                       metadata::Vector{ASCIIString},
                       domain::ASCIIString = "")
     result = _setmetadata(obj,
-                          Ptr{Ptr{Uint8}}(pointer(metadata)),
+                          Ptr{Ptr{UInt8}}(pointer(metadata)),
                           pointer(domain))
     (result == CE_Failure) && error("Failed to set metadata")
     if result == CE_Warning
@@ -90,9 +90,9 @@ Fetch single metadata item.
 value string on success.
 """
 _getmetadataitem(obj::GDALMajorObjectH,
-                 name::Ptr{Uint8},
-                 domain::Ptr{Uint8}) =
-    GDALGetMetadataItem(obj, name, domain)::Ptr{Uint8}
+                 name::Ptr{UInt8},
+                 domain::Ptr{UInt8}) =
+    GDALGetMetadataItem(obj, name, domain)::Ptr{UInt8}
 
 function getmetadataitem(obj::GDALMajorObjectH,
                          name::ASCIIString,
@@ -104,7 +104,7 @@ end
 
 function getmetadataitem(obj::GDALMajorObjectH,
                          name::ASCIIString)
-    result = _getmetadataitem(obj, pointer(name), Ptr{Uint8}(C_NULL))
+    result = _getmetadataitem(obj, pointer(name), Ptr{UInt8}(C_NULL))
     result == C_NULL && error("Unable to find key $name")
     bytestring(result)
 end
@@ -121,9 +121,9 @@ Set single metadata item.
 `CE_None` on success, or an error code on failure.
 """
 _setmetadataitem(obj::GDALMajorObjectH,
-                 name::Ptr{Uint8},
-                 value::Ptr{Uint8},
-                 domain::Ptr{Uint8} = Ptr{Uint8}(C_NULL)) =
+                 name::Ptr{UInt8},
+                 value::Ptr{UInt8},
+                 domain::Ptr{UInt8} = Ptr{UInt8}(C_NULL)) =
     GDALSetMetadataItem(obj, name, value, domain)::CPLErr
 
 function setmetadataitem!(obj::GDALMajorObjectH,
@@ -153,7 +153,7 @@ The semantics of the returned description are specific to the derived type.
 ### Returns
 non-null pointer to internal description string.
 """
-_getdescription(obj::GDALMajorObjectH) = GDALGetDescription(obj)::Ptr{Uint8}
+_getdescription(obj::GDALMajorObjectH) = GDALGetDescription(obj)::Ptr{UInt8}
 
 getdescription(obj::GDALMajorObjectH) = bytestring(_getdescription(obj))
 
@@ -168,7 +168,7 @@ For `GDALRasterBands` it is actually a description (if supported) or `""`.
 Normally application code should not set the "description" for `GDALDatasets`.
 It is handled internally.
 """
-_setdescription(obj::GDALMajorObjectH, desc::Ptr{Uint8}) =
+_setdescription(obj::GDALMajorObjectH, desc::Ptr{UInt8}) =
     GDALSetDescription(obj, desc)
 
 setdescription!(obj::GDALMajorObjectH, desc::ASCIIString) = 
@@ -196,7 +196,7 @@ information on build time options.
 ### Returns
 an internal string containing the requested information.
 """
-_versioninfo(request::Ptr{Uint8}) = GDALVersionInfo(request)::Ptr{Uint8}
+_versioninfo(request::Ptr{UInt8}) = GDALVersionInfo(request)::Ptr{UInt8}
 
 versioninfo(request::ASCIIString) = bytestring(_versioninfo(pointer(request)))
 
@@ -216,7 +216,7 @@ failure mentionning the name of the calling component.
 `TRUE` if GDAL library version at runtime matches nVersionMajor.nVersionMinor,
 `FALSE` otherwise.
 """
-_checkversion(major::Integer, minor::Integer, name::Ptr{Uint8}=Ptr{Uint8}(C_NULL)) =
+_checkversion(major::Integer, minor::Integer, name::Ptr{UInt8}=Ptr{UInt8}(C_NULL)) =
     GDALCheckVersion(major, minor, name)::Cint
 
 checkversion(major::Integer, minor::Integer) = Bool(_checkversion(major, minor))
