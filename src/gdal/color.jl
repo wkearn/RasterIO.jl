@@ -8,13 +8,13 @@ but there are some variations. So `GCI_GrayIndex` returns "Gray" and
 not be modified or freed by the application.
 """
 _getcolorinterpretationname(colorinterp::GDALColorInterp) = 
-    GDALGetColorInterpretationName(colorinterp)::Ptr{Uint8}
+    GDALGetColorInterpretationName(colorinterp)::Ptr{UInt8}
 
 colorinterpname(colorinterp::GDALColorInterp) =
     bytestring(_getcolorinterpretationname(colorinterp))
 
 "Get color interpretation corresponding to the given symbolic name."
-_getcolorinterpretationbyname(pszName::Ptr{Uint8}) =
+_getcolorinterpretationbyname(pszName::Ptr{UInt8}) =
     GDALGetColorInterpretationByName(pszName)::GDALColorInterp
 
 colorinterp(name::ASCIIString) = _getcolorinterpretationbyname(pointer(name))
@@ -111,10 +111,10 @@ Fetch a color entry from table.
 ### Returns
 pointer to internal color entry, or NULL if index is out of range.
 """
-_getcolorentry(htable::GDALColorTableH, i::Cint) =
+_getcolorentry(htable::GDALColorTableH, i::Integer) =
     GDALGetColorEntry(hTable, i)::Ptr{GDALColorEntry}
 
-getcolorentry(htable::GDALColorTableH, i::Cint) =
+getcolorentry(htable::GDALColorTableH, i::Integer) =
     _getcolorentry(hTable, i-1)
 
 """
@@ -130,11 +130,11 @@ color spaces into RGB on the fly, but currently only works on RGB color tables.
 ### Returns
 `TRUE` on success, or `FALSE` if the conversion isn't supported.
 """
-_getcolorentryasrgb(hTable::GDALColorTableH, i::Cint,
+_getcolorentryasrgb(hTable::GDALColorTableH, i::Integer,
                     poEntry::Ptr{GDALColorEntry}) =
     GDALGetColorEntryAsRGB(hTable, i, poEntry)::Cint
 
-function getcolorentryasrgb!(hTable::GDALColorTableH, i::Cint,
+function getcolorentryasrgb!(hTable::GDALColorTableH, i::Integer,
                              poEntry::Ptr{GDALColorEntry})
     result = Bool(_getcolorentryasrgb(hTable, i-1, poEntry))
     result || error("conversion of color entry to RGB not supported")
@@ -153,10 +153,10 @@ The table is grown as needed to hold the supplied offset.
 * `i`           entry offset from `0` to `GetColorEntryCount()-1`.
 * `poEntry`     value to assign to table.
 """
-_setcolorentry(hTable::GDALColorTableH, i::Cint,
+_setcolorentry(hTable::GDALColorTableH, i::Integer,
                poEntry::Ptr{GDALColorEntry}) =
     GDALSetColorEntry(hTable, i, poEntry)
 
-setcolorentry!(hTable::GDALColorTableH, i::Cint,
+setcolorentry!(hTable::GDALColorTableH, i::Integer,
                poEntry::Ptr{GDALColorEntry}) =
     _setcolorentry(hTable, i-1, poEntry)

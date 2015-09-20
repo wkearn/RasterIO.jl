@@ -75,8 +75,8 @@ without rescanning the image.
 `CE_None` on success, `CE_Warning` if no values returned, `CE_Failure` if error
 """
 _getrasterstatistics(band::GDALRasterBandH,
-                     bApproxOK::Cint,
-                     bForce::Cint,
+                     bApproxOK::Integer,
+                     bForce::Integer,
                      pdfMin::Ptr{Cdouble},
                      pdfMax::Ptr{Cdouble},
                      pdfMean::Ptr{Cdouble},
@@ -110,7 +110,7 @@ subset of all tiles.
 terminated by the user.
 """
 _computerasterstatistics(band::GDALRasterBandH,
-                         bApproxOK::Cint,
+                         bApproxOK::Integer,
                          pdfMin::Ptr{Cdouble},
                          pdfMax::Ptr{Cdouble},
                          pdfMean::Ptr{Cdouble},
@@ -156,7 +156,7 @@ subset of all tiles.
 * `adfMinMax`   pointer to an Array (of size 2) for storing the min/max
 """
 _computerasterminmax(band::GDALRasterBandH,
-                     bApproxOK::Cint,
+                     bApproxOK::Integer,
                      adfMinMax::Ptr{Cdouble}) =
     GDALComputeRasterMinMax(band, bApproxOK, adfMinMax)
 
@@ -201,10 +201,10 @@ into `panHistogram[0]`, and values above will be mapped into
 _getrasterhistogram(hBand::GDALRasterBandH,
                     dfMin::Cdouble,
                     dfMax::Cdouble,
-                    nBuckets::Cint,
+                    nBuckets::Integer,
                     panHistogram::Ptr{Cint},
-                    bIncludeOutOfRange::Cint,
-                    bApproxOK::Cint,
+                    bIncludeOutOfRange::Integer,
+                    bApproxOK::Integer,
                     pfnProgress::GDALProgressFunc,
                     pProgressData::Ptr{Void}) =
     GDALGetRasterHistogram(hBand, dfMin, dfMax, nBuckets, panHistogram,
@@ -238,7 +238,7 @@ _getdefaulthistogram(hBand::GDALRasterBandH,
                      pdfMax::Ptr{Cdouble},
                      pnBuckets::Ptr{Cint},
                      ppanHistogram::Ptr{Ptr{Cint}},
-                     bForce::Cint,
+                     bForce::Integer,
                      pfnProgress::GDALProgressFunc,
                      pProgressData::Ptr{Void}) =
     GDALGetDefaultHistogram(hBand, pdfMin, pdfMax, pnBuckets, ppanHistogram,
@@ -252,6 +252,6 @@ Use `GDALSetRasterHistogramEx()` instead for counts exceeding 2 billion.
 _setdefaulthistogram(hBand::GDALRasterBandH,
                      dfMin::Cdouble,
                      dfMax::Cdouble,
-                     nBuckets::Cint,
+                     nBuckets::Integer,
                      panHistogram::Ptr{Cint}) =
     GDALSetDefaultHistogram(hBand, dfMin, dfMax, nBuckets,panHistogram)::CPLErr

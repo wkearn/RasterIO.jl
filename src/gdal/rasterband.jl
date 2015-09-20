@@ -89,32 +89,32 @@ option can also be defined to override the default resampling to one of
 """
 _rasterio(hRBand::GDALRasterBandH,
           eRWFlag::GDALRWFlag,
-          nXOff::Cint,
-          nYOff::Cint,
-          nXSize::Cint,
-          nYSize::Cint,
+          nXOff::Integer,
+          nYOff::Integer,
+          nXSize::Integer,
+          nYSize::Integer,
           pData::Ptr{Void},
-          nBXSize::Cint,
-          nBYSize::Cint,
+          nBXSize::Integer,
+          nBYSize::Integer,
           eBufType::GDALDataType,
-          nPixelSpace::Cint,
-          nLineSpace::Cint) =
+          nPixelSpace::Integer,
+          nLineSpace::Integer) =
     GDALRasterIO(hRBand,eRWFlag,nXOff,nYOff,nXSize,nYSize,pData,nBXSize,
                  nBYSize,eBufType,nPixelSpace,nLineSpace)::CPLErr
 
 function rasterio!{T <: Real}(rasterband::GDALRasterBandH,
                               buffer::Array{T,2},
-                              width::Cint,
-                              height::Cint,
-                              xoffset::Cint = Cint(0),
-                              yoffset::Cint = Cint(0),
+                              width::Integer,
+                              height::Integer,
+                              xoffset::Integer = 0,
+                              yoffset::Integer = 0,
                               access::GDALRWFlag = GF_Read,
-                              nPixelSpace::Cint = Cint(0),
-                              nLineSpace::Cint = Cint(0))
+                              nPixelSpace::Integer = 0,
+                              nLineSpace::Integer = 0)
     xsize, ysize = size(buffer)
     io_error = _rasterio(rasterband, access, xoffset, yoffset, width,
-                         height, Ptr{Void}(pointer(buffer)), Cint(xsize),
-                         Cint(ysize), _gdaltype(T), nPixelSpace, nLineSpace)
+                         height, Ptr{Void}(pointer(buffer)), xsize,
+                         ysize, _gdaltype(T), nPixelSpace, nLineSpace)
     (io_error == CE_Failure) && error("Failed to access raster band")
     buffer
 end
@@ -122,23 +122,23 @@ end
 function rasterio!{T <: Real}(rasterband::GDALRasterBandH,
                               buffer::Array{T,2},
                               access::GDALRWFlag = GF_Read,
-                              nPixelSpace::Cint = Cint(0),
-                              nLineSpace::Cint = Cint(0))
+                              nPixelSpace::Integer = 0,
+                              nLineSpace::Integer = 0)
     rasterio!(rasterband, buffer, _getrasterbandxsize(rasterband),
-              _getrasterbandysize(rasterband), Cint(0), Cint(0), access,
+              _getrasterbandysize(rasterband), 0, 0, access,
               nPixelSpace, nLineSpace)
 end
 
-function rasterio!{T <: Real}(rasterband::GDALRasterBandH,
-                              buffer::Array{T,2},
-                              rows::UnitRange{Cint},
-                              cols::UnitRange{Cint},
-                              access::GDALRWFlag = GF_Read,
-                              nPixelSpace::Cint = Cint(0),
-                              nLineSpace::Cint = Cint(0))
-    width = cols[end] - cols[1] + Cint(1)
+function rasterio!{T <: Real, U <: Integer}(rasterband::GDALRasterBandH,
+                                            buffer::Array{T,2},
+                                            rows::UnitRange{U},
+                                            cols::UnitRange{U},
+                                            access::GDALRWFlag = GF_Read,
+                                            nPixelSpace::Integer = 0,
+                                            nLineSpace::Integer = 0)
+    width = cols[end] - cols[1] + 1
     width < 0 && error("invalid window width")
-    height = rows[end] - rows[1] + Cint(1)
+    height = rows[end] - rows[1] + 1
     height < 0 && error("invalid window height")
     rasterio!(rasterband, buffer, width, height, cols[1], rows[1], access,
               nPixelSpace, nLineSpace)
@@ -184,13 +184,13 @@ modified, nor freed by the calling application.
 unit name string.
 """
 _getrasterunittype(hBand::GDALRasterBandH) =
-    GDALGetRasterUnitType(hBand)::Ptr{Uint8}
+    GDALGetRasterUnitType(hBand)::Ptr{UInt8}
 
 getrasterunittype(hBand::GDALRasterBandH) =
     bytestring(_getrasterunittype(hBand))
 
 "Set unit type."
-_setrasterunittype(hBand::GDALRasterBandH, newvalue::Ptr{Uint8}) =
+_setrasterunittype(hBand::GDALRasterBandH, newvalue::Ptr{UInt8}) =
     GDALSetRasterUnitType(hBand, newvalue)::CPLErr
 
 function setrasterunittype!(hBand::GDALRasterBandH, newvalue::ASCIIString)
@@ -297,7 +297,7 @@ More options may be supported in the future.
 """
 _rasterbandcopywholeraster(hSrcBand::GDALRasterBandH,
                            hDstBand::GDALRasterBandH,
-                           papszOptions::Ptr{Ptr{Uint8}},
+                           papszOptions::Ptr{Ptr{UInt8}},
                            pfnProgress::GDALProgressFunc,
                            pProgressData::Ptr{Void}) =
     GDALRasterBandCopyWholeRaster(hSrcBand, hDstBand, papszOptions,
@@ -307,16 +307,16 @@ function rasterbandcopywholeraster(hSrcBand::GDALRasterBandH,
                                    hDstBand::GDALRasterBandH,
                                    options::Vector{ASCIIString})
     result = _rasterbandcopywholeraster(hSrcBand, hDstBand,
-                                        Ptr{Ptr{Uint8}}(pointer(options)),
-                                        Ptr{Void}(C_NULL), Ptr{Void}(C_NULL))
+                                        Ptr{Ptr{UInt8}}(pointer(options)),
+                                        C_NULL, C_NULL)
     (result == CE_Failure) && error("Failed to copy raster band")
 end
 
 function rasterbandcopywholeraster(hSrcBand::GDALRasterBandH,
                                    hDstBand::GDALRasterBandH)
     result = _rasterbandcopywholeraster(hSrcBand, hDstBand,
-                                        Ptr{Ptr{Uint8}}(C_NULL),
-                                        Ptr{Void}(C_NULL), Ptr{Void}(C_NULL))
+                                        Ptr{Ptr{UInt8}}(C_NULL),
+                                        C_NULL, C_NULL)
     (result == CE_Failure) && error("Failed to copy raster band")
 end
 
@@ -347,9 +347,9 @@ per band.
 `CE_None` on success or `CE_Failure` on failure.
 """
 _regenerateoverviews(hSrcBand::GDALRasterBandH,
-                     nOverviewCount::Cint,
+                     nOverviewCount::Integer,
                      pahOvrBands::Ptr{GDALRasterBandH},
-                     pszResampling::Ptr{Uint8},
+                     pszResampling::Ptr{UInt8},
                      pfnProgress::GDALProgressFunc,
                      pProgressData::Ptr{Void}) =
     GDALRegenerateOverviews(hSrcBand, nOverviewCount, pahOverviewBands,
@@ -357,14 +357,14 @@ _regenerateoverviews(hSrcBand::GDALRasterBandH,
 
 "Advise driver of upcoming read requests."
 _rasteradviseread(hRB::GDALRasterBandH,
-                  nDSXOff::Cint,
-                  nDSYOff::Cint,
-                  nDSXSize::Cint,
-                  nDSYSize::Cint,
-                  nBXSize::Cint,
-                  nBYSize::Cint,
+                  nDSXOff::Integer,
+                  nDSYOff::Integer,
+                  nDSXSize::Integer,
+                  nDSYSize::Integer,
+                  nBXSize::Integer,
+                  nBYSize::Integer,
                   eBDataType::GDALDataType,
-                  papszOptions::Ptr{Ptr{Uint8}}) =
+                  papszOptions::Ptr{Ptr{UInt8}}) =
     GDALRasterAdviseRead(hRB, nDSXOff, nDSYOff, nDSXSize, nDSYSize, nBXSize,
                          nBYSize, eBDataType, papszOptions)::CPLErr
 
@@ -391,8 +391,8 @@ large enough to hold `GetBlockXSize()*GetBlockYSize()` words of type
 `CE_None` on success or `CE_Failure` on an error.
 """
 _readblock(band::GDALRasterBandH,
-           nXBlockOff::Cint,
-           nYBlockOff::Cint,
+           nXBlockOff::Integer,
+           nYBlockOff::Integer,
            pImage::Ptr{Void}) = 
     GDALReadBlock(band, nXBlockOff, nYBlockOff, pImage)::CPLErr
 
@@ -418,8 +418,8 @@ be large enough to hold `GetBlockXSize()*GetBlockYSize()` words of type
 `CE_None` on success or `CE_Failure` on an error.
 """
 _writeblock(band::GDALRasterBandH,
-            nXBlockOff::Cint,
-            nYBlockOff::Cint,
+            nXBlockOff::Integer,
+            nYBlockOff::Integer,
             pImage::Ptr{Void}) = 
     GDALWriteBlock(band, nXBlockOff, nYBlockOff, pImage)::CPLErr
 
@@ -454,10 +454,10 @@ Fetch overview raster band object.
 ### Returns
 overview GDALRasterBand.
 """
-_getoverview(band::GDALRasterBandH, i::Cint) =
+_getoverview(band::GDALRasterBandH, i::Integer) =
     GDALGetOverview(band, i)::GDALRasterBandH
 
-getoverview(band::GDALRasterBandH, i::Int) = _getoverview(band, Cint(i-1))
+getoverview(band::GDALRasterBandH, i::Int) = _getoverview(band, i-1)
 
 """
 Fetch best sampling overview.
@@ -474,7 +474,7 @@ have enough samples.
 ### Returns
 optimal overview or the band itself.
 """
-_getrastersampleoverview(band::GDALRasterBandH, nDesiredSamples::Cint) =
+_getrastersampleoverview(band::GDALRasterBandH, nDesiredSamples::Integer) =
     GDALGetRasterSampleOverview(band, nDesiredSamples)::GDALRasterBandH
 
 """
@@ -515,10 +515,10 @@ period of time.
 list of names, or `NULL` if none.
 """
 _getrastercategorynames(band::GDALRasterBandH) =
-    GDALGetRasterCategoryNames(band)::Ptr{Ptr{Uint8}}
+    GDALGetRasterCategoryNames(band)::Ptr{Ptr{UInt8}}
 
 "Set the category names for this band."
-_setrastercategorynames(band::GDALRasterBandH, names::Ptr{Ptr{Uint8}}) =
+_setrastercategorynames(band::GDALRasterBandH, names::Ptr{Ptr{UInt8}}) =
     GDALSetRasterCategoryNames(band, names)::CPLErr
 
 """
@@ -643,5 +643,5 @@ See also: http://trac.osgeo.org/gdal/wiki/rfc15_nodatabitmask
 ### Returns
 `CE_None` on success or `CE_Failure` on an error.
 """
-_createmaskband(band::GDALRasterBandH,nFlags::Cint) =
+_createmaskband(band::GDALRasterBandH,nFlags::Integer) =
     GDALCreateMaskBand(band, nFlags)::CPLErr

@@ -15,7 +15,7 @@ It is unwise to have open dataset handles on this dataset when it is deleted.
 ### Returns
 `CE_None` on success, or `CE_Failure` if the operation fails.
 """
-_deletedataset(dataset::GDALDriverH, pszFilename::Ptr{Uint8}) =
+_deletedataset(dataset::GDALDriverH, pszFilename::Ptr{UInt8}) =
     GDALDeleteDataset(dataset, pszFilename)::CPLErr
 
 function deletedataset(dataset::GDALDriverH, filename::ASCIIString)
@@ -40,8 +40,8 @@ renamed.
 `CE_None` on success, or `CE_Failure` if the operation fails.
 """
 _renamedataset(dataset::GDALDriverH,
-               pszNewName::Ptr{Uint8},
-               pszOldName::Ptr{Uint8}) =
+               pszNewName::Ptr{UInt8},
+               pszOldName::Ptr{UInt8}) =
     GDALRenameDataset(dataset, pszNewName, pszOldName)::CPLErr
 
 function renamedataset(dataset::GDALDriverH,
@@ -63,8 +63,8 @@ Copy the files associated with a dataset.
 `CE_None` on success, or `CE_Failure` if the operation fails.
 """
 _copydatasetfiles(dataset::GDALDriverH,
-                  pszNewName::Ptr{Uint8},
-                  pszOldName::Ptr{Uint8}) =
+                  pszNewName::Ptr{UInt8},
+                  pszOldName::Ptr{UInt8}) =
     GDALCopyDatasetFiles(dataset, pszNewName, pszOldName)::CPLErr
 
 function copydatasetfiles(dataset::GDALDriverH,
@@ -100,12 +100,12 @@ element is a `NULL` pointer
 `TRUE` if the list of creation options is compatible with the `Create()` and
 `CreateCopy()` method of the driver, `FALSE` otherwise.
 """
-_validatecreationoptions(hDriver::GDALDriverH, options::Ptr{Ptr{Uint8}}) =
+_validatecreationoptions(hDriver::GDALDriverH, options::Ptr{Ptr{UInt8}}) =
     GDALValidateCreationOptions(hDriver, options)::Cint
 
 function validatecreationoptions(hDriver::GDALDriverH,
                                  options::Vector{ASCIIString})
-    poptions = Ptr{Ptr{Uint8}}(pointer(options))
+    poptions = Ptr{Ptr{UInt8}}(pointer(options))
     Bool(_validatecreationoptions(hDriver, poptions))
 end
 
@@ -121,11 +121,11 @@ _getrastercount(dataset::GDALDatasetH) = GDALGetRasterCount(dataset)::Cint
 """
 Fetch a band object for a dataset from its index (from 1 to `GetRasterCount()`)
 """
-_getrasterband(dataset::GDALDatasetH, i::Cint) =
+_getrasterband(dataset::GDALDatasetH, i::Integer) =
   GDALGetRasterBand(dataset, i)::GDALRasterBandH
 
 getrasterband(dataset::GDALDatasetH, i::Int) =
-  _getrasterband(dataset, Cint(i))
+  _getrasterband(dataset, i)
 
 """
 Add a band to a dataset.
@@ -147,13 +147,13 @@ are format specific. `NULL` may be passed by default.
 """
 _addband(hDS::GDALDatasetH,
          eType::GDALDataType,
-         papszOptions::Ptr{Ptr{Uint8}}) = 
+         papszOptions::Ptr{Ptr{UInt8}}) = 
     GDALAddBand(hDS, eType, papszOptions)::CPLErr
 
 function addband(hDS::GDALDatasetH,
                  eType::GDALDataType,
                  options::Vector{ASCIIString})
-    poptions = Ptr{Ptr{Uint8}}(pointer(options))
+    poptions = Ptr{Ptr{UInt8}}(pointer(options))
     result = _addband(hDS, eType, poptions)
     (result == CE_Failure) && error("Failed to add band")
 end
@@ -218,19 +218,19 @@ option can also be defined to override the default resampling to one of
 """
 _datasetrasterio(hDS::GDALDatasetH,
                  eRWFlag::GDALRWFlag,
-                 nDSXOff::Cint,
-                 nDSYOff::Cint,
-                 nDSXSize::Cint,
-                 nDSYSize::Cint,
+                 nDSXOff::Integer,
+                 nDSYOff::Integer,
+                 nDSXSize::Integer,
+                 nDSYSize::Integer,
                  pData::Ptr{Void},
-                 nBXSize::Cint,
-                 nBYSize::Cint,
+                 nBXSize::Integer,
+                 nBYSize::Integer,
                  eBDataType::GDALDataType,
-                 nBandCount::Cint,
+                 nBandCount::Integer,
                  panBandCount::Ptr{Cint},
-                 nPixelSpace::Cint = Cint(0),
-                 nLineSpace::Cint = Cint(0),
-                 nBandSpace::Cint = Cint(0)) =
+                 nPixelSpace::Integer = 0,
+                 nLineSpace::Integer = 0,
+                 nBandSpace::Integer = 0) =
     GDALDatasetRasterIO(hDS, eRWFlag, nDSXOff, nDSYOff, nDSXSize, nDSYSize,
                         pData, nBXSize, nBYSize, eBDataType, nBandCount,
                         panBandCount, nPixelSpace, nLineSpace,
@@ -239,16 +239,16 @@ _datasetrasterio(hDS::GDALDatasetH,
 function rasterio!{T <: Real}(hDS::GDALDatasetH,
                               buffer::Array{T, 3},
                               bands::Vector{Cint},
-                              width::Cint,
-                              height::Cint,
-                              xoffset::Cint = Cint(0),
-                              yoffset::Cint = Cint(0),
+                              width::Integer,
+                              height::Integer,
+                              xoffset::Integer = 0,
+                              yoffset::Integer = 0,
                               access::GDALRWFlag = GF_Read,
-                              nPixelSpace::Cint = Cint(0),
-                              nLineSpace::Cint = Cint(0),
-                              nBandSpace::Cint = Cint(0))
-    xsize, ysize, zsize = map(Cint,size(buffer))
-    nband = Cint(length(bands))
+                              nPixelSpace::Integer = 0,
+                              nLineSpace::Integer = 0,
+                              nBandSpace::Integer = 0)
+    xsize, ysize, zsize = size(buffer)
+    nband = length(bands)
     @assert nband == zsize
     result = _datasetrasterio(hDS, access, xoffset, yoffset, width, height,
                               Ptr{Void}(pointer(buffer)), xsize, ysize,
@@ -262,37 +262,36 @@ function rasterio!{T <: Real}(hDS::GDALDatasetH,
                               buffer::Array{T, 3},
                               bands::Vector{Cint},
                               access::GDALRWFlag = GF_Read,
-                              nPixelSpace::Cint = Cint(0),
-                              nLineSpace::Cint = Cint(0),
-                              nBandSpace::Cint = Cint(0))
-    rasterio!(hDS, buffer, bands, _getrasterxsize(hDS),
-              _getrasterysize(hDS), Cint(0), Cint(0), access,
-              nPixelSpace, nLineSpace, nBandSpace)
+                              nPixelSpace::Integer = 0,
+                              nLineSpace::Integer = 0,
+                              nBandSpace::Integer = 0)
+    rasterio!(hDS, buffer, bands, _getrasterxsize(hDS), _getrasterysize(hDS),
+              0, 0, access, nPixelSpace, nLineSpace, nBandSpace)
 end
 
-function rasterio!{T <: Real}(hDS::GDALDatasetH,
-                              buffer::Array{T, 3},
-                              bands::Vector{Cint},
-                              rows::UnitRange{Cint},
-                              cols::UnitRange{Cint},
-                              access::GDALRWFlag = GF_Read,
-                              nPixelSpace::Cint = Cint(0),
-                              nLineSpace::Cint = Cint(0),
-                              nBandSpace::Cint = Cint(0))
-    width = cols[end] - cols[1] + Cint(1)
+function rasterio!{T <: Real, U <: Integer}(hDS::GDALDatasetH,
+                                            buffer::Array{T, 3},
+                                            bands::Vector{Cint},
+                                            rows::UnitRange{U},
+                                            cols::UnitRange{U},
+                                            access::GDALRWFlag = GF_Read,
+                                            nPixelSpace::Integer = 0,
+                                            nLineSpace::Integer = 0,
+                                            nBandSpace::Integer = 0)
+    width = cols[end] - cols[1] + 1
     width < 0 && error("invalid window width")
-    height = rows[end] - rows[1] + Cint(1)
+    height = rows[end] - rows[1] + 1
     height < 0 && error("invalid window height")
     rasterio!(hDS, buffer, bands, width, height, cols[1], rows[1], access,
               nPixelSpace, nLineSpace, nBandSpace)
 end
 
 "Fetch a format specific internally meaningful handle."
-_getinternalhandle(dataset::GDALDatasetH, request::Ptr{Uint8}) =
+_getinternalhandle(dataset::GDALDatasetH, request::Ptr{UInt8}) =
     GDALGetInternalHandle(dataset, request)::Ptr{Void}
 
 getinternalhandle(dataset::GDALDatasetH, request::ASCIIString) =
-    _getinternalhandle(dataset, Ptr{Uint8}(pointer(request)))
+    _getinternalhandle(dataset, Ptr{UInt8}(pointer(request)))
 
 """
 Add one to dataset reference count. The reference is one after instantiation.
@@ -343,10 +342,10 @@ call could be made:
 ```
 """
 _buildoverviews(arg1::GDALDatasetH,
-                pszResampling::Ptr{Uint8},
-                nOverviews::Cint,
+                pszResampling::Ptr{UInt8},
+                nOverviews::Integer,
                 panOverviewList::Ptr{Cint},
-                nListBands::Cint,
+                nListBands::Integer,
                 panBandList::Ptr{Cint},
                 pfnProgress::GDALProgressFunc,
                 pProgressData::Ptr{Void}) =
@@ -358,9 +357,9 @@ function buildoverviews(hDS::GDALDatasetH,
                         overviewlist::Vector{Cint},
                         bandList::Vector{Cint})
     result = _buildoverviews(hDS, pointer(resampling),
-                             Cint(length(overviewlist)),
+                             length(overviewlist),
                              pointer(overviewlist),
-                             Cint(length(bandlist)),
+                             length(bandlist),
                              pointer(bandlist),
                              C_NULL, C_NULL)
     (result == CE_Failure) && error("Failed to build overviews")
@@ -425,7 +424,7 @@ See also: http://trac.osgeo.org/gdal/wiki/rfc15_nodatabitmask
 `CE_None` on success or `CE_Failure` on an error.
 """
 _createdatasetmaskband(hDS::GDALDatasetH,
-                       nFlags::Cint = Cint(GMF_PER_DATASET)) =
+                       nFlags::Integer = GMF_PER_DATASET) =
     GDALCreateDatasetMaskBand(hDS, nFlags)::CPLErr
 
 function createdatasetmaskband(hDS::GDALDatasetH)
@@ -463,7 +462,7 @@ supported in the future.
 """
 _datasetcopywholeraster(hSrcDS::GDALDatasetH,
                         hDstDS::GDALDatasetH,
-                        papszOptions::Ptr{Ptr{Uint8}},
+                        papszOptions::Ptr{Ptr{UInt8}},
                         pfnProgress::GDALProgressFunc,
                         pProgressData::Ptr{Void}) =
     GDALDatasetCopyWholeRaster(hSrcDS, hDstDS, papszOptions, pfnProgress,
@@ -473,6 +472,6 @@ function datasetcopywholeraster(sourceDS::GDALDatasetH,
                                 destDS::GDALDatasetH,
                                 options::Vector{ASCIIString})
     result = _datasetcopywholeraster(sourceDS, destDS,
-                                     Ptr{Ptr{Uint8}}(pointer(options)))
+                                     Ptr{Ptr{UInt8}}(pointer(options)))
     (result == CE_Failure) && error("Failed to copy whole raster")
 end
