@@ -11,6 +11,7 @@ end
 "prints info about a raster"
 function gdalinfo(inputString::AbstractString)
   raster = openraster(inputString, GA_ReadOnly)
+  
   if (raster.dataset == null)
       println("Can't open $inputString")
       return null;
