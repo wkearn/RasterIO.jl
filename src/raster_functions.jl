@@ -8,6 +8,27 @@ function drivers()
     dlist
 end
 
+"prints info about a raster"
+function gdalinfo(inputString::AbstractString)
+  raster = openraster(inputString, GA_ReadOnly)
+  if (raster.dataset == null)
+      println("Can't open $inputString")
+      return null;
+  end
+  # simple info
+  println("*** Metadata for file $(inputString)")
+  println("Projection String : $(getprojection(raster.dataset))")
+  println("Band Count : $(raster.nband)")
+  println("Dimensions : $(GDALGetRasterXSize(raster.dataset)) (cols) x $(_getrasterysize(raster.dataset)) (rows)")
+  println("Using Driver : $(drivershortname(_getdatasetdriver(raster.dataset)))")
+  println("Metadata :")
+  # all metadata
+  metadataList = getmetadata(raster.dataset)
+  for i=1:length(metadataList)
+      println("    $(metadataList[i])")
+  end
+end
+
 geotransform(raster::Raster) = getgeotransform(raster.dataset)
 wktprojection(raster::Raster) = getprojection(raster.dataset)
 
