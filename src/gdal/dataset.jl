@@ -121,11 +121,8 @@ _getrastercount(dataset::GDALDatasetH) = GDALGetRasterCount(dataset)::Cint
 """
 Fetch a band object for a dataset from its index (from 1 to `GetRasterCount()`)
 """
-_getrasterband(dataset::GDALDatasetH, i::Integer) =
-  GDALGetRasterBand(dataset, i)::GDALRasterBandH
-
-getrasterband(dataset::GDALDatasetH, i::Int) =
-  _getrasterband(dataset, i)
+getrasterband(raster::Raster, i::Integer) =
+    GDALGetRasterBand(raster.dataset, i)
 
 """
 Add a band to a dataset.
@@ -147,7 +144,7 @@ are format specific. `NULL` may be passed by default.
 """
 _addband(hDS::GDALDatasetH,
          eType::GDALDataType,
-         papszOptions::Ptr{Ptr{UInt8}}) = 
+         papszOptions::Ptr{Ptr{UInt8}}) =
     GDALAddBand(hDS, eType, papszOptions)::CPLErr
 
 function addband(hDS::GDALDatasetH,
@@ -337,7 +334,7 @@ call could be made:
 
 ```C
    int       anOverviewList[3] = { 2, 4, 8 };
-   poDataset->BuildOverviews( "NEAREST", 3, anOverviewList, 0, NULL, 
+   poDataset->BuildOverviews( "NEAREST", 3, anOverviewList, 0, NULL,
                               GDALDummyProgress, NULL );
 ```
 """
@@ -378,7 +375,7 @@ returned.
 ### Returns
 a pointer to an array of dataset handles.
 """
-_getopendatasets(hDS::Ptr{Ptr{GDALDatasetH}}, pnCount::Ptr{Cint}) = 
+_getopendatasets(hDS::Ptr{Ptr{GDALDatasetH}}, pnCount::Ptr{Cint}) =
     GDALGetOpenDatasets(hdS, pnCount)
 
 "Return access flag."

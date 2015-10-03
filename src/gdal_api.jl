@@ -1,6 +1,3 @@
-include("clang/gdal_cdefs.jl")
-include("clang/gdal_cfuns.jl")
-
 include("gdal/type.jl")
 include("gdal/utilities.jl")
 include("gdal/drivers.jl")
