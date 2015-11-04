@@ -12,10 +12,6 @@ function Base.show(io::IO, raster::Raster)
         dptr = _getdatasetdriver(raster.dataset)
         driverstring = "$(drivershortname(dptr))/$(driverlongname(dptr))"
         println(io, "RasterIO.Raster (Driver: $driverstring)")
-        print(io, "Image Structure: ")
-        for m in getmetadata(raster.dataset, "IMAGE_STRUCTURE")
-            print(io, "--$m ")
-        end
         print(io, "\nFile(s): ")
         for filename in getfilelist(raster.dataset)
             print(io, "$filename ")
