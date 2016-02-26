@@ -11,6 +11,6 @@ before_install:
   - sudo apt-get install -qq libgdal1h
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia --check-bounds=yes -e 'Pkg.clone(pwd()); Pkg.build("RasterIO"); Pkg.test("RasterIO"; coverage=true)'
+  - julia --check-bounds=yes -e 'Pkg.clone(pwd()); using Conda; Pkg.build("RasterIO"); Pkg.test("RasterIO"; coverage=true)'
 after_success:
   - julia -e 'cd(Pkg.dir("RasterIO")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
