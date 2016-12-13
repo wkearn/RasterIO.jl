@@ -175,7 +175,7 @@ _setgeotransform(dataset::GDALDatasetH, buffer::Ptr{Cdouble}) =
     GDALSetGeoTransform(dataset, buffer)::CPLErr
 
 function setgeotransform!(dataset::GDALDatasetH, transform::Vector{Cdouble})
-    @assert length(buffer) == 6
+    @assert length(transform) == 6
     result = _setgeotransform(dataset, pointer(transform))
     (result == CE_Failure) && error("Failed to transform raster dataset")
 end
