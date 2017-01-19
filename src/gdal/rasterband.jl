@@ -257,8 +257,8 @@ _getrasterscale(hBand::GDALRasterBandH, pbSuccess::Ptr{Cint}) =
     GDALGetRasterScale(hBand, pbSuccess)::Cdouble
 
 function getrasterscale(rasterband::GDALRasterBandH)
-    success = Ref{Cint}()
-    scale = _getrasterscale(rasterband, success)
+    success = Array{Cint}()
+    scale = _getrasterscale(rasterband, pointer(success))
     (scale, Bool(success[]))
 end
 
@@ -494,6 +494,12 @@ the nodata value for this band.
 """
 _getrasternodatavalue(band::GDALRasterBandH, pbSuccess::Ptr{Cint}) =
     GDALGetRasterNoDataValue(band, pbSuccess)::Cdouble
+
+function getrasternodatavalue(rasterband::GDALRasterBandH)
+    success = Array{Cint}()
+    nodata = _getrasternodatavalue(rasterband, pointer(success))
+    nodata, Bool(success[])
+end
 
 "Set the no data value for this band."
 _setrasternodatavalue(band::GDALRasterBandH, value::Cdouble) =

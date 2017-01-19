@@ -13,7 +13,6 @@ _getcolorinterpretationname(colorinterp::GDALColorInterp) =
 colorinterpname(colorinterp::GDALColorInterp) =
     unsafe_string(_getcolorinterpretationname(colorinterp))
 
-
 "Get color interpretation corresponding to the given symbolic name."
 _getcolorinterpretationbyname(pszName::Ptr{UInt8}) =
     GDALGetColorInterpretationByName(pszName)::GDALColorInterp
