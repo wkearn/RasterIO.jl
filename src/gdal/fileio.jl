@@ -38,12 +38,12 @@ _create(hDriver::GDALDriverH,
                nBands, eType, options)::GDALDatasetH
 
 function createdataset(driver::GDALDriverH,
-                       filename::Union{ASCIIString,UTF8String},
+                       filename::Union{String,String},
                        width::Integer,
                        height::Integer,
                        nband::Integer,
                        eType::GDALDataType,
-                       options::Vector{ASCIIString}=Vector{ASCIIString}())
+                       options::Vector{String}=Vector{String}())
     pfilename = pointer(filename)
     dataset = _create(driver, pfilename, width, height, nband, eType,
                       Ptr{Ptr{UInt8}}(pointer(options)))
@@ -106,10 +106,10 @@ _createcopy(driver::GDALDriverH,
                    pfnProgress, pProgressData)::GDALDatasetH
 
 function createcopy(driver::GDALDriverH,
-                    filename::Union{ASCIIString,UTF8String},
+                    filename::Union{String,String},
                     source::GDALDatasetH,
                     bStrict::Bool = false,
-                    options::Vector{ASCIIString} = Vector{ASCIIString}(),
+                    options::Vector{String} = Vector{String}(),
                     pfnProgress::GDALProgressFunc = C_NULL,
                     pProgressData::Ptr{Void} = C_NULL)
     source == C_NULL && error("NULL source dataset")
@@ -160,7 +160,7 @@ A `GDALDatasetH` handle or `NULL` on failure.
 _open(pszFilename::Ptr{UInt8}, eAccess::GDALAccess) =
     GDALOpen(pszFilename, eAccess)::GDALDatasetH
 
-function opendataset(filename::ASCIIString, access::GDALAccess=GA_ReadOnly)
+function opendataset(filename::String, access::GDALAccess=GA_ReadOnly)
     dataset = _open(pointer(filename), access)
     dataset == C_NULL && error("Could not open file \"$filename\"")
     dataset

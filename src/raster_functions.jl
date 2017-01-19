@@ -1,7 +1,7 @@
 
 "Returns a listing of all registered drivers"
 function drivers()
-    dlist = Dict{ASCIIString,ASCIIString}()
+    dlist = Dict{String,String}()
     for i=1:drivercount()
         dlist[drivershortname(i)] = driverlongname(i)
     end
@@ -12,34 +12,34 @@ geotransform(raster::Raster) = getgeotransform(raster.dataset)
 wktprojection(raster::Raster) = getprojection(raster.dataset)
 
 # Raster I/O
-openraster(filename::ASCIIString, access::GDALAccess=GA_ReadOnly) =
+openraster(filename::String, access::GDALAccess=GA_ReadOnly) =
     Raster(opendataset(filename, access))
 
-function createraster(filename::Union{ASCIIString,UTF8String},
+function createraster(filename::Union{String,String},
                       width::Int,
                       height::Int,
                       nbands::Int,
                       dtype::DataType,
-                      drivername::ASCIIString,
-                      options::Vector{ASCIIString} = Vector{ASCIIString}())
+                      drivername::String,
+                      options::Vector{String} = Vector{String}())
     Raster(createdataset(driverbyname(drivername), filename, width, height,
                          nbands, _gdaltype(dtype), options))
 end
 
 function writeraster(raster::Raster,
-                     filename::Union{ASCIIString,UTF8String},
+                     filename::Union{String,String},
                      strict::Bool = false,
-                     options::Vector{ASCIIString} = Vector{ASCIIString}())
+                     options::Vector{String} = Vector{String}())
     raster.dataset == C_NULL && error("Can't read closed raster file")
     _close(createcopy(_getdatasetdriver(raster.dataset), filename,
                       raster.dataset, strict, options))
 end
 
 function writeraster(raster::Raster,
-                     filename::Union{ASCIIString,UTF8String},
-                     drivername::ASCIIString,
+                     filename::Union{String,String},
+                     drivername::String,
                      strict::Bool = false,
-                     options::Vector{ASCIIString} = Vector{ASCIIString}())
+                     options::Vector{String} = Vector{String}())
     raster.dataset == C_NULL && error("Can't read closed raster file")
     _close(createcopy(driverbyname(drivername), filename, raster.dataset,
                       strict, options))

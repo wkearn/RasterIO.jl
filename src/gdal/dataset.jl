@@ -18,7 +18,7 @@ It is unwise to have open dataset handles on this dataset when it is deleted.
 _deletedataset(dataset::GDALDriverH, pszFilename::Ptr{UInt8}) =
     GDALDeleteDataset(dataset, pszFilename)::CPLErr
 
-function deletedataset(dataset::GDALDriverH, filename::ASCIIString)
+function deletedataset(dataset::GDALDriverH, filename::String)
     result = _deletedataset(dataset, pointer(filename))
     (result == CE_Failure) && error("Failed to delete dataset")
     @assert result == CE_None
@@ -45,8 +45,8 @@ _renamedataset(dataset::GDALDriverH,
     GDALRenameDataset(dataset, pszNewName, pszOldName)::CPLErr
 
 function renamedataset(dataset::GDALDriverH,
-                       newname::ASCIIString,
-                       oldname::ASCIIString)
+                       newname::String,
+                       oldname::String)
     result = _renamedataset(dataset, pointer(newname), pointer(oldname))
     (result == CE_Failure) && error("Failed to rename $oldname to $newname")
     @assert result == CE_None
@@ -68,8 +68,8 @@ _copydatasetfiles(dataset::GDALDriverH,
     GDALCopyDatasetFiles(dataset, pszNewName, pszOldName)::CPLErr
 
 function copydatasetfiles(dataset::GDALDriverH,
-                          newname::ASCIIString,
-                          oldname::ASCIIString)
+                          newname::String,
+                          oldname::String)
     result = _copydatasetfiles(dataset, pointer(newname), pointer(oldname))
     (result == CE_Failure) && error("Failed to copy $oldname to $newname")
     @assert result == CE_None
@@ -104,7 +104,7 @@ _validatecreationoptions(hDriver::GDALDriverH, options::Ptr{Ptr{UInt8}}) =
     GDALValidateCreationOptions(hDriver, options)::Cint
 
 function validatecreationoptions(hDriver::GDALDriverH,
-                                 options::Vector{ASCIIString})
+                                 options::Vector{String})
     poptions = Ptr{Ptr{UInt8}}(pointer(options))
     Bool(_validatecreationoptions(hDriver, poptions))
 end
@@ -147,12 +147,12 @@ are format specific. `NULL` may be passed by default.
 """
 _addband(hDS::GDALDatasetH,
          eType::GDALDataType,
-         papszOptions::Ptr{Ptr{UInt8}}) = 
+         papszOptions::Ptr{Ptr{UInt8}}) =
     GDALAddBand(hDS, eType, papszOptions)::CPLErr
 
 function addband(hDS::GDALDatasetH,
                  eType::GDALDataType,
-                 options::Vector{ASCIIString})
+                 options::Vector{String})
     poptions = Ptr{Ptr{UInt8}}(pointer(options))
     result = _addband(hDS, eType, poptions)
     (result == CE_Failure) && error("Failed to add band")
@@ -290,7 +290,7 @@ end
 _getinternalhandle(dataset::GDALDatasetH, request::Ptr{UInt8}) =
     GDALGetInternalHandle(dataset, request)::Ptr{Void}
 
-getinternalhandle(dataset::GDALDatasetH, request::ASCIIString) =
+getinternalhandle(dataset::GDALDatasetH, request::String) =
     _getinternalhandle(dataset, Ptr{UInt8}(pointer(request)))
 
 """
@@ -337,7 +337,7 @@ call could be made:
 
 ```C
    int       anOverviewList[3] = { 2, 4, 8 };
-   poDataset->BuildOverviews( "NEAREST", 3, anOverviewList, 0, NULL, 
+   poDataset->BuildOverviews( "NEAREST", 3, anOverviewList, 0, NULL,
                               GDALDummyProgress, NULL );
 ```
 """
@@ -353,7 +353,7 @@ _buildoverviews(arg1::GDALDatasetH,
                        panBandList, pfnProgress, pProgressData)::CPLErr
 
 function buildoverviews(hDS::GDALDatasetH,
-                        resampling::ASCIIString,
+                        resampling::String,
                         overviewlist::Vector{Cint},
                         bandList::Vector{Cint})
     result = _buildoverviews(hDS, pointer(resampling),
@@ -378,7 +378,7 @@ returned.
 ### Returns
 a pointer to an array of dataset handles.
 """
-_getopendatasets(hDS::Ptr{Ptr{GDALDatasetH}}, pnCount::Ptr{Cint}) = 
+_getopendatasets(hDS::Ptr{Ptr{GDALDatasetH}}, pnCount::Ptr{Cint}) =
     GDALGetOpenDatasets(hdS, pnCount)
 
 "Return access flag."
@@ -470,7 +470,7 @@ _datasetcopywholeraster(hSrcDS::GDALDatasetH,
 
 function datasetcopywholeraster(sourceDS::GDALDatasetH,
                                 destDS::GDALDatasetH,
-                                options::Vector{ASCIIString})
+                                options::Vector{String})
     result = _datasetcopywholeraster(sourceDS, destDS,
                                      Ptr{Ptr{UInt8}}(pointer(options)))
     (result == CE_Failure) && error("Failed to copy whole raster")

@@ -1,7 +1,7 @@
 using RasterIO
 using Base.Test
 
-function check_create(drivername::ASCIIString, copy::Int=0)
+function check_create(drivername::String, copy::Int=0)
     driver = RasterIO.driverbyname(drivername)
     if copy == 1
         createcopy = RasterIO.getmetadataitem(driver,"DCAP_CREATECOPY")
@@ -49,4 +49,3 @@ for file in readdir()
         rm(file)
     end
 end
-

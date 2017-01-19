@@ -7,17 +7,17 @@ but there are some variations. So `GCI_GrayIndex` returns "Gray" and
 `GCI_RedBand` returns "Red". The returned strings are static strings and should
 not be modified or freed by the application.
 """
-_getcolorinterpretationname(colorinterp::GDALColorInterp) = 
+_getcolorinterpretationname(colorinterp::GDALColorInterp) =
     GDALGetColorInterpretationName(colorinterp)::Ptr{UInt8}
 
 colorinterpname(colorinterp::GDALColorInterp) =
-    bytestring(_getcolorinterpretationname(colorinterp))
+    @compat unsafe_string(_getcolorinterpretationname(colorinterp))
 
 "Get color interpretation corresponding to the given symbolic name."
 _getcolorinterpretationbyname(pszName::Ptr{UInt8}) =
     GDALGetColorInterpretationByName(pszName)::GDALColorInterp
 
-colorinterp(name::ASCIIString) = _getcolorinterpretationbyname(pointer(name))
+colorinterp(name::String) = _getcolorinterpretationbyname(pointer(name))
 
 "Color Interpretation value for band"
 _getrastercolorinterpretation(band::GDALRasterBandH) =

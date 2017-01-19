@@ -50,7 +50,7 @@ Some formats may efficiently implement decimation into a buffer by reading from
 lower resolution overview images.
 
 For highest performance full resolution data access, read and write on "block
-boundaries" returned by `GetBlockSize()`, or use the `ReadBlock()` and 
+boundaries" returned by `GetBlockSize()`, or use the `ReadBlock()` and
 `WriteBlock()` methods.
 
 ### Parameters
@@ -187,13 +187,13 @@ _getrasterunittype(hBand::GDALRasterBandH) =
     GDALGetRasterUnitType(hBand)::Ptr{UInt8}
 
 getrasterunittype(hBand::GDALRasterBandH) =
-    bytestring(_getrasterunittype(hBand))
+    @compat unsafe_string(_getrasterunittype(hBand))
 
 "Set unit type."
 _setrasterunittype(hBand::GDALRasterBandH, newvalue::Ptr{UInt8}) =
     GDALSetRasterUnitType(hBand, newvalue)::CPLErr
 
-function setrasterunittype!(hBand::GDALRasterBandH, newvalue::ASCIIString)
+function setrasterunittype!(hBand::GDALRasterBandH, newvalue::String)
     result = _setrasterunittype(hBand, pointer(newvalue))
     (result == CE_Failure) && error("Failed to set raster offset")
 end
@@ -305,7 +305,7 @@ _rasterbandcopywholeraster(hSrcBand::GDALRasterBandH,
 
 function rasterbandcopywholeraster(hSrcBand::GDALRasterBandH,
                                    hDstBand::GDALRasterBandH,
-                                   options::Vector{ASCIIString})
+                                   options::Vector{String})
     result = _rasterbandcopywholeraster(hSrcBand, hDstBand,
                                         Ptr{Ptr{UInt8}}(pointer(options)),
                                         C_NULL, C_NULL)
@@ -393,7 +393,7 @@ large enough to hold `GetBlockXSize()*GetBlockYSize()` words of type
 _readblock(band::GDALRasterBandH,
            nXBlockOff::Integer,
            nYBlockOff::Integer,
-           pImage::Ptr{Void}) = 
+           pImage::Ptr{Void}) =
     GDALReadBlock(band, nXBlockOff, nYBlockOff, pImage)::CPLErr
 
 """
@@ -420,7 +420,7 @@ be large enough to hold `GetBlockXSize()*GetBlockYSize()` words of type
 _writeblock(band::GDALRasterBandH,
             nXBlockOff::Integer,
             nYBlockOff::Integer,
-            pImage::Ptr{Void}) = 
+            pImage::Ptr{Void}) =
     GDALWriteBlock(band, nXBlockOff, nYBlockOff, pImage)::CPLErr
 
 """
