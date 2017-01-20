@@ -6,7 +6,7 @@ function loadstringlist(pstringlist::Ptr{Ptr{UInt8}})
     i = 1
     item = unsafe_load(pstringlist, i)
     while item != C_NULL
-        push!(stringlist, @compat unsafe_string(item))
+        push!(stringlist, unsafe_string(item))
         i += 1
         item = unsafe_load(pstringlist, i)
     end
@@ -99,14 +99,14 @@ function getmetadataitem(obj::GDALMajorObjectH,
                          domain::String)
     result = _getmetadataitem(obj, pointer(name), pointer(domain))
     result == C_NULL && error("Unable to find key $name in domain $domain")
-    @compat unsafe_string(result)
+    unsafe_string(result)
 end
 
 function getmetadataitem(obj::GDALMajorObjectH,
                          name::String)
     result = _getmetadataitem(obj, pointer(name), Ptr{UInt8}(C_NULL))
     result == C_NULL && error("Unable to find key $name")
-    @compat unsafe_string(result)
+    unsafe_string(result)
 end
 
 """
@@ -155,7 +155,7 @@ non-null pointer to internal description string.
 """
 _getdescription(obj::GDALMajorObjectH) = GDALGetDescription(obj)::Ptr{UInt8}
 
-getdescription(obj::GDALMajorObjectH) = @compat unsafe_string(_getdescription(obj))
+getdescription(obj::GDALMajorObjectH) = unsafe_string(_getdescription(obj))
 
 """
 Set object description.
@@ -198,7 +198,7 @@ an internal string containing the requested information.
 """
 _versioninfo(request::Ptr{UInt8}) = GDALVersionInfo(request)::Ptr{UInt8}
 
-versioninfo(request::String) = @compat unsafe_string(_versioninfo(pointer(request)))
+versioninfo(request::String) = unsafe_string(_versioninfo(pointer(request)))
 
 """
 Return `TRUE` if GDAL version at runtime matches nVersionMajor.nVersionMinor.

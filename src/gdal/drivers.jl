@@ -75,7 +75,7 @@ The returned string should not be freed and is owned by the driver.
 """
 _getdrivershortname(ptr::GDALDriverH) = GDALGetDriverShortName(ptr)::Ptr{UInt8}
 
-drivershortname(ptr::GDALDriverH) = @compat unsafe_string(_getdrivershortname(ptr))
+drivershortname(ptr::GDALDriverH) = unsafe_string(_getdrivershortname(ptr))
 drivershortname(i::Integer) = drivershortname(driverbyindex(i))
 
 """
@@ -85,7 +85,7 @@ The returned string should not be freed and is owned by the driver.
 """
 _getdriverlongname(ptr::GDALDriverH) = GDALGetDriverLongName(ptr)
 
-driverlongname(ptr::GDALDriverH) = @compat unsafe_string(_getdriverlongname(ptr))
+driverlongname(ptr::GDALDriverH) = unsafe_string(_getdriverlongname(ptr))
 driverlongname(i::Integer) = driverlongname(driverbyindex(i))
 
 """
@@ -135,7 +135,7 @@ should not be freed and is owned by the driver.
 _getdriverhelptopic(driver::GDALDriverH) =
     GDALGetDriverHelpTopic(driver)::Ptr{UInt8}
 
-driverhelptopic(driver::GDALDriverH) = @compat unsafe_string(_getdriverhelptopic(driver))
+driverhelptopic(driver::GDALDriverH) = unsafe_string(_getdriverhelptopic(driver))
 
 """
 Return the list of creation options of the driver used by `Create()` and
@@ -152,4 +152,4 @@ _getdrivercreationoptionlist(driver::GDALDriverH) =
     GDALGetDriverCreationOptionList(driver)::Ptr{UInt8}
 
 drivercreationoptionlist(driver::GDALDriverH) =
-    @compat unsafe_string(_getdrivercreationoptionlist(driver))
+    unsafe_string(_getdrivercreationoptionlist(driver))

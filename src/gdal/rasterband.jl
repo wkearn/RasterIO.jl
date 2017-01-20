@@ -187,7 +187,7 @@ _getrasterunittype(hBand::GDALRasterBandH) =
     GDALGetRasterUnitType(hBand)::Ptr{UInt8}
 
 getrasterunittype(hBand::GDALRasterBandH) =
-    @compat unsafe_string(_getrasterunittype(hBand))
+    unsafe_string(_getrasterunittype(hBand))
 
 "Set unit type."
 _setrasterunittype(hBand::GDALRasterBandH, newvalue::Ptr{UInt8}) =

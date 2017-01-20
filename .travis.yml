@@ -3,7 +3,11 @@ os:
   - linux
 julia:
   - 0.4
+  - release
   - nightly
+matrix:
+  allow_failures:
+    - julia: nightly
 notifications:
   email: false
 before_install:

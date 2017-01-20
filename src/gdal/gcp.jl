@@ -196,7 +196,7 @@ _getgcpprojection(dataset::GDALDatasetH) =
     GDALGetGCPProjection(dataset)::Ptr{UInt8}
 
 getgcpprojection(dataset::GDALDatasetH) =
-    @compat unsafe_string(_getgcpprojection(dataset))
+    unsafe_string(_getgcpprojection(dataset))
 
 """
 Fetch GCPs.
@@ -246,7 +246,7 @@ See also: http://www.gdal.org/ogr/osr_tutorial.html
 _getprojectionref(dataset::GDALDatasetH) =
     GDALGetProjectionRef(dataset)::Ptr{UInt8}
 
-getprojection(dataset::GDALDatasetH) = @compat unsafe_string(_getprojectionref(dataset))
+getprojection(dataset::GDALDatasetH) = unsafe_string(_getprojectionref(dataset))
 
 "Set the projection reference string for this dataset."
 _setprojection(dataset::GDALDatasetH, projstring::Ptr{UInt8}) =
