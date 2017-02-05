@@ -9,9 +9,12 @@ module RasterIO
       error("libgdal not properly installed. Please run Pkg.build(\"RasterIO\")")
     end
 
-    include("gdal_api.jl")
+    include("clang/gdal_cdefs.jl")
+    include("clang/gdal_cfuns.jl")
+
     include("raster_types.jl")
     include("raster_functions.jl")
+    include("gdal_api.jl")
 
     GDALAllRegister() # register all known drivers
 

@@ -121,11 +121,8 @@ _getrastercount(dataset::GDALDatasetH) = GDALGetRasterCount(dataset)::Cint
 """
 Fetch a band object for a dataset from its index (from 1 to `GetRasterCount()`)
 """
-_getrasterband(dataset::GDALDatasetH, i::Integer) =
-  GDALGetRasterBand(dataset, i)::GDALRasterBandH
-
-getrasterband(dataset::GDALDatasetH, i::Int) =
-  _getrasterband(dataset, i)
+getrasterband(raster::Raster, i::Integer) =
+    GDALGetRasterBand(raster.dataset, i)
 
 """
 Add a band to a dataset.
