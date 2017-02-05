@@ -27,8 +27,8 @@ be cast to a `GDALDriver *`.
 _identifydriver(pszFilename::Ptr{UInt8}, papszFileList::Ptr{Ptr{UInt8}}) =
     GDALIdentifyDriver(pszFilename, papszFileList)::GDALDriverH
 
-function identifydriver(filename::ASCIIString,
-                        filelist::Vector{ASCIIString} = Vector{ASCIIString}())
+function identifydriver(filename::String,
+                        filelist::Vector{String} = Vector{String}())
     driver = _identifydriver(pointer(filename),
                              Ptr{Ptr{UInt8}}(pointer(filelist)))
     (driver == C_NULL) && error("Could not identify driver")
@@ -43,7 +43,7 @@ Returns `NULL` if no match is found.
 _getdriverbyname(drivername::Ptr{UInt8}) =
     GDALGetDriverByName(drivername)::GDALDriverH
 
-function driverbyname(drivername::ASCIIString)
+function driverbyname(drivername::String)
     driver = _getdriverbyname(pointer(drivername))
     (driver == C_NULL) && error("Could not find driver $drivername")
     driver
@@ -75,7 +75,7 @@ The returned string should not be freed and is owned by the driver.
 """
 _getdrivershortname(ptr::GDALDriverH) = GDALGetDriverShortName(ptr)::Ptr{UInt8}
 
-drivershortname(ptr::GDALDriverH) = bytestring(_getdrivershortname(ptr))
+drivershortname(ptr::GDALDriverH) = unsafe_string(_getdrivershortname(ptr))
 drivershortname(i::Integer) = drivershortname(driverbyindex(i))
 
 """
@@ -85,7 +85,7 @@ The returned string should not be freed and is owned by the driver.
 """
 _getdriverlongname(ptr::GDALDriverH) = GDALGetDriverLongName(ptr)
 
-driverlongname(ptr::GDALDriverH) = bytestring(_getdriverlongname(ptr))
+driverlongname(ptr::GDALDriverH) = unsafe_string(_getdriverlongname(ptr))
 driverlongname(i::Integer) = driverlongname(driverbyindex(i))
 
 """
@@ -135,7 +135,7 @@ should not be freed and is owned by the driver.
 _getdriverhelptopic(driver::GDALDriverH) =
     GDALGetDriverHelpTopic(driver)::Ptr{UInt8}
 
-driverhelptopic(driver::GDALDriverH) = bytestring(_getdriverhelptopic(driver))
+driverhelptopic(driver::GDALDriverH) = unsafe_string(_getdriverhelptopic(driver))
 
 """
 Return the list of creation options of the driver used by `Create()` and
@@ -152,4 +152,4 @@ _getdrivercreationoptionlist(driver::GDALDriverH) =
     GDALGetDriverCreationOptionList(driver)::Ptr{UInt8}
 
 drivercreationoptionlist(driver::GDALDriverH) =
-    bytestring(_getdrivercreationoptionlist(driver))
+    unsafe_string(_getdrivercreationoptionlist(driver))

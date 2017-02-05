@@ -1,12 +1,12 @@
 
 "Load a `NULL`-terminated list of strings"
 function loadstringlist(pstringlist::Ptr{Ptr{UInt8}})
-    stringlist = Vector{ASCIIString}()
+    stringlist = Vector{String}()
     (pstringlist == C_NULL) && return stringlist
     i = 1
     item = unsafe_load(pstringlist, i)
     while item != C_NULL
-        push!(stringlist, bytestring(item))
+        push!(stringlist, unsafe_string(item))
         i += 1
         item = unsafe_load(pstringlist, i)
     end
@@ -45,7 +45,7 @@ Note that relatively few formats return any metadata at this time.
 _getmetadata(obj::GDALMajorObjectH, domain::Ptr{UInt8}) =
     GDALGetMetadata(obj, domain)::Ptr{Ptr{UInt8}}
 
-getmetadata(obj::GDALMajorObjectH, domain::ASCIIString = "") =
+getmetadata(obj::GDALMajorObjectH, domain::String = "") =
     loadstringlist(_getmetadata(obj, pointer(domain)))
 
 """
@@ -66,8 +66,8 @@ _setmetadata(obj::GDALMajorObjectH,
     GDALSetMetadata(obj, metadata, domain)::CPLErr
 
 function setmetadata!(obj::GDALMajorObjectH,
-                      metadata::Vector{ASCIIString},
-                      domain::ASCIIString = "")
+                      metadata::Vector{String},
+                      domain::String = "")
     result = _setmetadata(obj,
                           Ptr{Ptr{UInt8}}(pointer(metadata)),
                           pointer(domain))
@@ -95,18 +95,18 @@ _getmetadataitem(obj::GDALMajorObjectH,
     GDALGetMetadataItem(obj, name, domain)::Ptr{UInt8}
 
 function getmetadataitem(obj::GDALMajorObjectH,
-                         name::ASCIIString,
-                         domain::ASCIIString)
+                         name::String,
+                         domain::String)
     result = _getmetadataitem(obj, pointer(name), pointer(domain))
     result == C_NULL && error("Unable to find key $name in domain $domain")
-    bytestring(result)
+    unsafe_string(result)
 end
 
 function getmetadataitem(obj::GDALMajorObjectH,
-                         name::ASCIIString)
+                         name::String)
     result = _getmetadataitem(obj, pointer(name), Ptr{UInt8}(C_NULL))
     result == C_NULL && error("Unable to find key $name")
-    bytestring(result)
+    unsafe_string(result)
 end
 
 """
@@ -127,17 +127,17 @@ _setmetadataitem(obj::GDALMajorObjectH,
     GDALSetMetadataItem(obj, name, value, domain)::CPLErr
 
 function setmetadataitem!(obj::GDALMajorObjectH,
-                          name::ASCIIString,
-                          value::ASCIIString,
-                          domain::ASCIIString)
+                          name::String,
+                          value::String,
+                          domain::String)
     result = _setmetadataitem(obj, pointer(name), pointer(value),
                               pointer(domain))
     result == CE_None || error("Unable to set metadata item")
 end
 
 function setmetadataitem!(obj::GDALMajorObjectH,
-                          name::ASCIIString,
-                          value::ASCIIString)
+                          name::String,
+                          value::String)
     result = _setmetadataitem(obj, pointer(name), pointer(value))
     result == CE_None || error("Unable to set metadata item")
 end
@@ -155,7 +155,7 @@ non-null pointer to internal description string.
 """
 _getdescription(obj::GDALMajorObjectH) = GDALGetDescription(obj)::Ptr{UInt8}
 
-getdescription(obj::GDALMajorObjectH) = bytestring(_getdescription(obj))
+getdescription(obj::GDALMajorObjectH) = unsafe_string(_getdescription(obj))
 
 """
 Set object description.
@@ -171,7 +171,7 @@ It is handled internally.
 _setdescription(obj::GDALMajorObjectH, desc::Ptr{UInt8}) =
     GDALSetDescription(obj, desc)
 
-setdescription!(obj::GDALMajorObjectH, desc::ASCIIString) = 
+setdescription!(obj::GDALMajorObjectH, desc::String) =
     _setdescription(obj, pointer(desc))
 
 """
@@ -198,7 +198,7 @@ an internal string containing the requested information.
 """
 _versioninfo(request::Ptr{UInt8}) = GDALVersionInfo(request)::Ptr{UInt8}
 
-versioninfo(request::ASCIIString) = bytestring(_versioninfo(pointer(request)))
+versioninfo(request::String) = unsafe_string(_versioninfo(pointer(request)))
 
 """
 Return `TRUE` if GDAL version at runtime matches nVersionMajor.nVersionMinor.
@@ -221,7 +221,7 @@ _checkversion(major::Integer, minor::Integer, name::Ptr{UInt8}=Ptr{UInt8}(C_NULL
 
 checkversion(major::Integer, minor::Integer) = Bool(_checkversion(major, minor))
 
-checkversion(major::Integer, minor::Integer, name::ASCIIString) =
+checkversion(major::Integer, minor::Integer, name::String) =
     Bool(_checkversion(major, minor, pointer(name)))
 
 """

@@ -1,4 +1,6 @@
 module RasterIO
+    using Compat
+    import Compat.String
     using BinDeps
     const depfile = joinpath(dirname(@__FILE__), "..", "deps", "deps.jl")
     if isfile(depfile)

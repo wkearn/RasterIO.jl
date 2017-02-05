@@ -71,7 +71,7 @@ Apply GeoTransform to x/y coordinate.
 Applies the following computation, converting a (pixel,line) coordinate into a
 georeferenced `(geo_x,geo_y)` location.
 ```C
-    *pdfGeoX =  padfGeoTransform[0] + 
+    *pdfGeoX =  padfGeoTransform[0] +
                 dfPixel * padfGeoTransform[1] +
                 dfLine * padfGeoTransform[2];
 
@@ -102,7 +102,7 @@ function applygeotransform(geotransform::Vector{Cdouble},
     geo_y = geo_x + sizeof(Cdouble)
     _applygeotransform(pointer(geotransform), pixel, line, geo_x, geo_y)
     geo_xy
-end 
+end
 
 """
 Compose two geotransforms.
@@ -196,7 +196,7 @@ _getgcpprojection(dataset::GDALDatasetH) =
     GDALGetGCPProjection(dataset)::Ptr{UInt8}
 
 getgcpprojection(dataset::GDALDatasetH) =
-    bytestring(_getgcpprojection(dataset))
+    unsafe_string(_getgcpprojection(dataset))
 
 """
 Fetch GCPs.
@@ -246,13 +246,13 @@ See also: http://www.gdal.org/ogr/osr_tutorial.html
 _getprojectionref(dataset::GDALDatasetH) =
     GDALGetProjectionRef(dataset)::Ptr{UInt8}
 
-getprojection(dataset::GDALDatasetH) = bytestring(_getprojectionref(dataset))
+getprojection(dataset::GDALDatasetH) = unsafe_string(_getprojectionref(dataset))
 
 "Set the projection reference string for this dataset."
 _setprojection(dataset::GDALDatasetH, projstring::Ptr{UInt8}) =
     GDALSetProjection(dataset, projstring)::CPLErr
 
-function setprojection!(dataset::GDALDatasetH, projstring::ASCIIString)
+function setprojection!(dataset::GDALDatasetH, projstring::String)
     result = _setprojection(dataset, pointer(projstring))
     (result == CE_Failure) && error("Could not set projection")
 end
