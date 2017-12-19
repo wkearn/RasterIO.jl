@@ -1,3 +1,5 @@
+__precompile__()
+
 module RasterIO
     using Compat
     import Compat.String
