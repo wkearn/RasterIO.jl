@@ -386,7 +386,7 @@ function GDALGetOverview(arg1::GDALRasterBandH,arg2::Integer)
     ccall((:GDALGetOverview,libgdal),GDALRasterBandH,(GDALRasterBandH,Cint),arg1,arg2)
 end
 
-function GDALGetRasterNoDataValue(arg1::GDALRasterBandH,arg2::Ptr{Cint})
+function GDALGetRasterNoDataValue(arg1::GDALRasterBandH,arg2::Ref{Cint})
     ccall((:GDALGetRasterNoDataValue,libgdal),Cdouble,(GDALRasterBandH,Ptr{Cint}),arg1,arg2)
 end
 
@@ -430,7 +430,7 @@ function GDALSetRasterUnitType(hBand::GDALRasterBandH,pszNewValue::Ptr{UInt8})
     ccall((:GDALSetRasterUnitType,libgdal),CPLErr,(GDALRasterBandH,Ptr{UInt8}),hBand,pszNewValue)
 end
 
-function GDALGetRasterOffset(arg1::GDALRasterBandH,pbSuccess::Ptr{Cint})
+function GDALGetRasterOffset(arg1::GDALRasterBandH,pbSuccess::Ref{Cint})
     ccall((:GDALGetRasterOffset,libgdal),Cdouble,(GDALRasterBandH,Ptr{Cint}),arg1,pbSuccess)
 end
 
@@ -438,7 +438,7 @@ function GDALSetRasterOffset(hBand::GDALRasterBandH,dfNewOffset::Cdouble)
     ccall((:GDALSetRasterOffset,libgdal),CPLErr,(GDALRasterBandH,Cdouble),hBand,dfNewOffset)
 end
 
-function GDALGetRasterScale(arg1::GDALRasterBandH,pbSuccess::Ptr{Cint})
+function GDALGetRasterScale(arg1::GDALRasterBandH,pbSuccess::Ref{Cint})
     ccall((:GDALGetRasterScale,libgdal),Cdouble,(GDALRasterBandH,Ptr{Cint}),arg1,pbSuccess)
 end
 

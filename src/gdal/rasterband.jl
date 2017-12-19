@@ -216,7 +216,7 @@ is meaningful or not. May be `NULL` (default).
 ### Returns
 the raster offset.
 """
-_getrasteroffset(hBand::GDALRasterBandH, pbSuccess::Ptr{Cint}) =
+_getrasteroffset(hBand::GDALRasterBandH, pbSuccess::Ref{Cint}) =
     GDALGetRasterOffset(hBand, pbSuccess)::Cdouble
 
 function getrasteroffset(rasterband::GDALRasterBandH)
@@ -253,7 +253,7 @@ is meaningful or not. May be `NULL` (default).
 ### Returns
 the raster scale.
 """
-_getrasterscale(hBand::GDALRasterBandH, pbSuccess::Ptr{Cint}) =
+_getrasterscale(hBand::GDALRasterBandH, pbSuccess::Ref{Cint}) =
     GDALGetRasterScale(hBand, pbSuccess)::Cdouble
 
 function getrasterscale(rasterband::GDALRasterBandH)
@@ -492,8 +492,14 @@ associated with this layer. May be `NULL` (default).
 ### Returns
 the nodata value for this band.
 """
-_getrasternodatavalue(band::GDALRasterBandH, pbSuccess::Ptr{Cint}) =
+_getrasternodatavalue(band::GDALRasterBandH, pbSuccess::Ref{Cint}) =
     GDALGetRasterNoDataValue(band, pbSuccess)::Cdouble
+
+function getrasternodatavalue(rasterband::GDALRasterBandH)
+    success = Ref{Cint}()
+    nodata = _getrasternodatavalue(rasterband, success)
+    nodata, Bool(success[])
+end
 
 "Set the no data value for this band."
 _setrasternodatavalue(band::GDALRasterBandH, value::Cdouble) =
